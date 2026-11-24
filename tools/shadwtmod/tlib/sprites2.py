@@ -17,8 +17,14 @@ def R(name):
     return ramp(PALETTES[name]["base"])
 
 
+_SEED = [0]
+
+
 def finish(c, k=0.30):
-    outline_sel(c, k)
+    """Every sprite ends here: texture, chipped edges, rim light, outline, a tight palette (see art.polish). Bigger canvases get more colours."""
+    _SEED[0] += 1
+    n = 16 if max(c.w, c.h) <= 40 else (24 if max(c.w, c.h) <= 70 else 32)
+    art.polish(c, seed=_SEED[0], ncolors=n, tex=0.22 if max(c.w, c.h) > 44 else 0.0, chipping=0.08 if max(c.w, c.h) > 44 else 0.0, outline=k)
     return c
 
 
@@ -1040,3 +1046,329 @@ def boss_head(kind, boss_fn):
             out.px[y * 24 + x] = big.px[sy * big.w + sx] if sy < big.h else CLEAR
     outline_sel(out, 0.3)
     return out
+
+
+# =============================================================== The Wilds Beyond: tiles, items, critters, town NPCs
+def tile_timber():
+    c = Canvas(16, 16)
+    r = R("wood")
+    for y in range(16):
+        for x in range(16):
+            c.set(x, y, r[2] if (y % 4) else r[1])
+    for y in range(0, 16, 4):                                                 # four planks, each with a lit top edge
+        for x in range(16):
+            c.set(x, y, r[1]); c.set(x, y + 1, r[3])
+    for (x, y) in ((3, 2), (11, 6), (6, 10), (13, 14), (2, 13)):
+        c.set(x, y, r[0])                                                     # nail heads and knots
+    return c
+
+
+def tile_shingle():
+    c = Canvas(16, 16)
+    r = ramp("#7a4a3a")
+    for row in range(4):
+        off = 4 if row % 2 else 0
+        for x in range(16):
+            for y in range(row * 4, row * 4 + 4):
+                c.set(x, y, r[3] if y == row * 4 else (r[1] if y == row * 4 + 3 else r[2]))
+        for x in range(off, 16, 8):
+            for y in range(row * 4, row * 4 + 4):
+                c.set(x % 16, y, r[0])
+    return c
+
+
+def tile_moss():
+    c = tile_brick("stone") if False else Canvas(16, 16)
+    r = R("stone")
+    _brick_rows(c, r, 4, 8, 4, 4)
+    g = R("green")
+    for (x, y, n) in ((0, 0, 7), (5, 4, 5), (9, 8, 6), (2, 12, 5), (11, 12, 4)):                  # moss creeping from the top of each course
+        for i in range(n):
+            c.set((x + i) % 16, y, g[2 + (i % 2)])
+            if i % 2 == 0:
+                c.set((x + i) % 16, y + 1, g[1])
+    return c
+
+
+def tile_weathered():
+    c = Canvas(16, 16)
+    r = R("stone")
+    for y in range(16):
+        for x in range(16):
+            c.set(x, y, r[2])
+    for (x0, y0, x1, y1) in ((0, 5, 15, 5), (0, 11, 15, 11), (7, 0, 7, 4), (3, 6, 3, 10), (11, 6, 11, 10), (8, 12, 8, 15)):
+        c.line(x0, y0, x1, y1, r[1])
+    for (x, y) in ((2, 2), (12, 3), (6, 8), (9, 9), (4, 13), (13, 14)):
+        c.set(x, y, r[3]); c.set(x + 1, y, r[0])
+    return c
+
+
+def item_scroll(pal, w=32, h=30):
+    c = Canvas(w, h)
+    r = R(pal)
+    lit_poly(c, [(5, 7), (27, 7), (27, 24), (5, 24)], R("sand"))                                               # the unrolled map
+    for (x0, y0, x1, y1) in ((9, 13, 15, 12), (15, 12, 20, 16), (20, 16, 24, 14), (10, 19, 19, 19)):
+        c.line(x0, y0, x1, y1, r[1])                                                                         # a coastline and a trail
+    c.set(22, 20, hexc("#c03020")); c.set(23, 20, hexc("#c03020")); c.set(22, 21, hexc("#c03020")); c.set(23, 21, hexc("#c03020"))   # the X
+    for y in (5, 22):                                                                                        # the rolled ends
+        lit_ellipse(c, 5, y + 2, 3.4, 3.4, r); lit_ellipse(c, 27, y + 2, 3.4, 3.4, r)
+    return finish(c)
+
+
+def item_book(pal, accent, w=28, h=32):
+    c = Canvas(w, h)
+    r, a = R(pal), R(accent)
+    lit_poly(c, [(5, 3), (24, 3), (24, 28), (5, 28)], r)                                                       # the cover
+    lit_poly(c, [(5, 3), (8, 3), (8, 28), (5, 28)], ramp("#3a2418"))                                         # the spine
+    lit_poly(c, [(24, 5), (26, 5), (26, 27), (24, 27)], R("sand"), flat=True)                               # the page block
+    lit_ellipse(c, 16, 13, 5, 5, a)                                                                          # a compass rose on the cover
+    for dx, dy in ((0, -7), (0, 7), (-7, 0), (7, 0)):
+        lit_poly(c, [(16 + dx * 0.4 - dy * 0.14, 13 + dy * 0.4 + dx * 0.14), (16 + dx, 13 + dy), (16 + dx * 0.4 + dy * 0.14, 13 + dy * 0.4 - dx * 0.14)], a)
+    c.line(10, 24, 22, 24, a[2])
+    return finish(c)
+
+
+def item_idol(pal, w=26, h=34):
+    c = Canvas(w, h)
+    r, mo = R(pal), R("green")
+    lit_poly(c, [(5, 31), (21, 31), (20, 27), (6, 27)], r)                                                     # a plinth
+    lit_poly(c, [(8, 27), (18, 27), (19, 15), (13, 12), (7, 15)], r)                                         # a squat body
+    lit_ellipse(c, 13, 9, 6, 6, r)                                                                           # the head
+    lit_poly(c, [(10, 3), (13, -1), (16, 3)], r)                                                              # a leaf crown
+    c.set(11, 9, hexc("#101810")); c.set(15, 9, hexc("#101810")); c.line(11, 12, 15, 12, r[0])
+    for (x, y, n) in ((8, 27, 3), (14, 18, 2), (9, 14, 2)):                                                  # moss on the old stone
+        for i in range(n):
+            c.set(x + i, y, mo[3]); c.set(x + i, y + 1, mo[2])
+    return finish(c)
+
+
+def item_crown(pal, w=32, h=26):
+    c = Canvas(w, h)
+    r = R(pal)
+    lit_poly(c, [(3, 22), (29, 22), (29, 17), (3, 17)], r)                                                     # the band
+    for x in (4, 10, 16, 22):
+        lit_poly(c, [(x, 17), (x + 3, 6 + (x % 5)), (x + 6, 17)], r)                                         # tines
+    lit_poly(c, [(24, 17), (29, 17), (29, 22), (24, 22)], ramp("#00000000"[:0] or "#20202a")) if False else None
+    for (x, y) in ((8, 19), (16, 19), (22, 19)):
+        lit_ellipse(c, x, y, 2, 2, ramp("#3080d0"))                                                          # inset stones
+    c.line(26, 15, 29, 23, ramp("#0c0c10")[1]); c.line(25, 16, 28, 24, ramp("#0c0c10")[1])                    # the broken edge
+    c.set(27, 20, (0, 0, 0, 0)); c.set(28, 21, (0, 0, 0, 0)); c.set(29, 22, (0, 0, 0, 0))
+    return finish(c)
+
+
+def item_tablet(pal, w=26, h=34):
+    c = Canvas(w, h)
+    r = R(pal)
+    lit_poly(c, [(4, 31), (22, 31), (22, 8), (17, 3), (9, 3), (4, 8)], r)                                     # a rounded-top stone
+    for y in range(9, 28, 4):                                                                                # rows of unreadable glyphs
+        for x in range(8, 19, 3):
+            c.set(x, y, r[0]); c.set(x + 1, y + ((x // 3) % 2), r[0]) if (x + y) % 5 else None
+    lit_poly(c, [(12, 20), (14, 20), (14, 26), (12, 26)], r, flat=True)
+    return finish(c)
+
+
+def item_lens(pal, w=30, h=32):
+    c = Canvas(w, h)
+    r = R(pal)
+    lit_line(c, (9, 27), (18, 17), 2.0, 2.0, ramp("#6a4a2a"))                                                  # the handle
+    lit_ellipse(c, 19, 12, 9, 9, r)                                                                          # the rim
+    lit_ellipse(c, 19, 12, 6.4, 6.4, [R("sea")[2], R("sea")[3], R("sea")[3], R("sea")[4], W], light=(-0.5, -0.7))   # the glass
+    specular(c, 16, 9, 2)
+    return finish(c)
+
+
+def item_medal(pal, accent, w=28, h=34):
+    c = Canvas(w, h)
+    r, a = R(pal), R(accent)
+    lit_poly(c, [(8, 1), (14, 12), (20, 1), (17, 1), (14, 6), (11, 1)], a)                                    # the ribbon
+    lit_ellipse(c, 14, 21, 10, 10, r)
+    lit_ellipse(c, 14, 21, 7, 7, [r[0], r[1], r[2], r[2], r[3]], light=(0.5, 0.7))
+    lit_poly(c, [(14, 15), (16, 20), (21, 20), (17, 23), (18, 28), (14, 25), (10, 28), (11, 23), (7, 20), (12, 20)], R("sun"))    # a star
+    return finish(c)
+
+
+def item_compass(pal, w=30, h=30):
+    c = Canvas(w, h)
+    r = R(pal)
+    lit_ellipse(c, 15, 16, 12, 12, r)
+    lit_ellipse(c, 15, 16, 9, 9, [R("sand")[1], R("sand")[2], R("sand")[3], R("sand")[4], W], light=(-0.3, -0.5))
+    lit_ellipse(c, 15, 4, 3, 3, r)                                                                           # the ring on top
+    lit_poly(c, [(15, 7), (18, 16), (15, 25), (12, 16)], ramp("#8a8a98"))
+    lit_poly(c, [(15, 7), (18, 16), (12, 16)], hexc("#c03020") and ramp("#c03020"))                         # the north half of the needle
+    c.set(15, 16, W)
+    return finish(c)
+
+
+# the critters: seven frames each (the passive "bunny" layout: 0 idle, 1 to 6 a walk), the creature faces right
+def _critter(body, w, h, frame, legs, head_up=0, tail=None, ear=None, belly=None, eye=(16, 16, 16, 255), spots=None, glow=False):
+    c = Canvas(w, h)
+    walk = frame % 7
+    ph = 0 if walk == 0 else walk
+    hop = 0 if walk == 0 else [0, 1, 0, -1, 0, 1][walk - 1] * (1 if h > 18 else 0)
+    cy = h - legs - 3 - hop
+    bx, rx, ry = w * 0.42, w * 0.30, max(3, h * 0.24)
+    for sx, k in ((-1, 1), (1, 0)):                                                                         # legs, alternating
+        for lx in (bx - rx * 0.5, bx + rx * 0.55):
+            swing = 0 if walk == 0 else [-2, -1, 0, 1, 2, 1][(walk - 1 + k) % 6]
+            lit_line(c, (lx, cy + ry * 0.5), (lx + swing * 0.7, h - 2), 1.5, 1.2, body if (lx > bx) == bool(k) else ramp(_darken(body)))
+    if tail:
+        tail(c, bx - rx, cy, body, ph)
+    lit_ellipse(c, bx, cy, rx, ry, body)
+    if belly:
+        lit_ellipse(c, bx + 1, cy + ry * 0.5, rx * 0.7, ry * 0.45, belly)
+    if spots:
+        for (dx, dy) in spots:
+            c.set(int(bx + dx), int(cy + dy), spots_tone(body))
+    hx, hy = bx + rx * 0.95, cy - ry * 0.55 - head_up
+    lit_ellipse(c, hx, hy, ry * 0.85, ry * 0.75, body)
+    lit_poly(c, [(hx + ry * 0.5, hy - 1), (hx + ry * 1.6, hy + ry * 0.2), (hx + ry * 0.5, hy + ry * 0.6)], belly or body)   # the muzzle
+    c.set(int(hx + ry * 1.55), int(hy + ry * 0.2), (20, 14, 14, 255))
+    c.set(int(hx + ry * 0.35), int(hy - 1), eye)
+    if ear:
+        ear(c, hx, hy, ry, body)
+    return finish(c, 0.35)
+
+
+def _darken(r):
+    return "#%02x%02x%02x" % (int(r[1][0]), int(r[1][1]), int(r[1][2]))
+
+
+def spots_tone(r):
+    return r[4]
+
+
+def _fox_tail(c, x, y, body, ph):
+    lit_poly(c, [(x + 2, y - 1), (x - 8, y - 5 + (ph % 2)), (x - 12, y - 1), (x - 6, y + 4), (x + 2, y + 3)], body)
+
+
+def _fox_ears(c, hx, hy, ry, body):
+    lit_poly(c, [(hx - ry * 0.4, hy - ry * 0.5), (hx - ry * 0.1, hy - ry * 1.9), (hx + ry * 0.4, hy - ry * 0.6)], body)
+    lit_poly(c, [(hx + ry * 0.1, hy - ry * 0.5), (hx + ry * 0.7, hy - ry * 1.8), (hx + ry * 0.9, hy - ry * 0.4)], body)
+
+
+def critter_fox(frame, w=34, h=22):
+    return _critter(ramp("#c8602a"), w, h, frame, 6, tail=_fox_tail, ear=_fox_ears, belly=ramp("#f4e8d4"))
+
+
+def critter_moonfox(frame, w=34, h=22):
+    c = _critter(ramp("#8aa8e8"), w, h, frame, 6, tail=_fox_tail, ear=_fox_ears, belly=ramp("#e8f0ff"), eye=(255, 255, 255, 255))
+    for (x, y) in ((8, 8), (14, 6), (20, 7), (26, 8), (5, 12)):                                                # a scatter of stars along the back
+        if c.get(x, y)[3]:
+            c.set(x, y, (255, 255, 230, 255))
+    return c
+
+
+def critter_deer(frame, w=40, h=38):
+    def ant(c, hx, hy, ry, body):
+        for sx in (-1, 1):
+            c.line(hx + sx * 1, hy - ry * 0.7, hx + sx * 3, hy - ry * 2.2, (120, 90, 60, 255)); c.line(hx + sx * 3, hy - ry * 2.2, hx + sx * 5, hy - ry * 2.8, (120, 90, 60, 255)); c.line(hx + sx * 3, hy - ry * 2.2, hx + sx * 1, hy - ry * 3.0, (120, 90, 60, 255))
+    def tl(c, x, y, body, ph):
+        lit_poly(c, [(x + 1, y - 2), (x - 3, y - 3), (x - 1, y + 1)], ramp("#f4e8d4"))
+    return _critter(ramp("#a06a38"), w, h, frame, 14, head_up=5, tail=tl, ear=ant, belly=ramp("#e8d4b0"), spots=((6, -2), (10, 0), (14, -3), (18, 0)))
+
+
+def critter_hedgehog(frame, w=24, h=16):
+    c = Canvas(w, h)
+    walk = frame % 7
+    body = ramp("#6a5240")
+    sp = ramp("#8a6a50")
+    lit_ellipse(c, 11, 9, 9, 6, body)
+    for k in range(9):                                                                                       # spines fanning back and up
+        a = math.radians(200 + k * 17)
+        lit_poly(c, [(11 + 6 * math.cos(a), 9 + 5 * math.sin(a)), (11 + 12 * math.cos(a), 9 + 9 * math.sin(a) - 1), (11 + 6 * math.cos(a + 0.35), 9 + 5 * math.sin(a + 0.35))], sp, flat=True)
+    lit_ellipse(c, 19, 11, 4, 3, ramp("#e0c8a0"))
+    c.set(21, 10, (16, 16, 16, 255)); c.set(23, 11, (20, 14, 14, 255))
+    for lx in (8, 14):
+        c.line(lx, 13, lx + ([0, -1, 0, 1, 0, 1, 0][walk]), 15, (60, 44, 34, 255))
+    return finish(c, 0.35)
+
+
+def critter_frog(frame, w=20, h=14):
+    c = Canvas(w, h)
+    walk = frame % 7
+    g = ramp("#4aa84a")
+    up = 0 if walk in (0, 1, 6) else 2
+    lit_ellipse(c, 9, 9 - up, 7, 4.2, g)
+    lit_ellipse(c, 9, 10 - up, 5, 2.2, ramp("#d8e8a0"))
+    lit_ellipse(c, 14, 7 - up, 3.4, 3, g)
+    for ex in (12, 16):
+        lit_ellipse(c, ex, 5 - up, 1.6, 1.6, g); c.set(ex, 5 - up, (240, 220, 40, 255))
+    lit_line(c, (4, 11 - up), (1, 13 + (1 if up else 0)), 1.6, 1.2, g)
+    lit_line(c, (10, 12 - up), (13, 13), 1.4, 1.1, g)
+    return finish(c, 0.35)
+
+
+# the town NPCs: 40 by 56, 25 frames (the Guide's layout). One figure, drawn with a few pose changes: idle, a walking sway for the long run of walk frames, a hand-up for the attack frames.
+def _townfolk(kind, pose, step, w=40, h=56):
+    c = Canvas(w, h)
+    cx = w // 2
+    sk = R("skin")
+    if kind == "guildmaster":
+        coat, trim, hat, pack = R("green"), R("gold"), ramp("#5a3a20"), R("wood")
+    else:
+        coat, trim, hat, pack = ramp("#6a5a88"), R("sand"), ramp("#8a8a98"), R("bronze")
+    sway = [0, 2, 3, 2, 0, -2, -3, -2][step % 8] if pose == "walk" else 0
+    bob = 1 if (pose == "walk" and step % 4 in (1, 3)) else 0
+    for sx in (-1, 1):                                                                                       # legs
+        k = sx * sway
+        lit_line(c, (cx + sx * 3, 38 + bob), (cx + sx * 3 + k * 0.5, h - 4), 3.2, 2.8, ramp("#4a3a2a") if sx > 0 else ramp("#3a2c20"))
+        lit_poly(c, [(cx + sx * 3 + k * 0.5 - 3, h - 6), (cx + sx * 3 + k * 0.5 + 4, h - 6), (cx + sx * 3 + k * 0.5 + 5, h - 1), (cx + sx * 3 + k * 0.5 - 3, h - 1)], ramp("#2a1c14"))
+    lit_ellipse(c, cx - 11, 27 + bob, 5, 9, pack)                                                            # the backpack and the bedroll over it
+    lit_ellipse(c, cx - 11, 17 + bob, 5.5, 2.6, R("olive"))
+    lit_poly(c, [(cx - 9, 20 + bob), (cx + 9, 20 + bob), (cx + 10, 44 + bob), (cx - 10, 44 + bob)], coat)    # the long coat
+    lit_poly(c, [(cx - 10, 41 + bob), (cx + 10, 41 + bob), (cx + 11, 45 + bob), (cx - 11, 45 + bob)], trim)
+    c.line(cx, 21 + bob, cx, 42 + bob, trim[1])
+    for y in (25, 30, 35):
+        c.set(cx - 2, y + bob, trim[3]); c.set(cx + 2, y + bob, trim[3])
+    arm_up = pose == "attack"
+    lit_line(c, (cx + 8, 22 + bob), (cx + (15 if arm_up else 11), (14 if arm_up else 34) + bob), 3, 2.6, coat)
+    lit_ellipse(c, cx + (15 if arm_up else 11), (13 if arm_up else 35) + bob, 2, 2, sk)
+    lit_line(c, (cx - 8, 22 + bob), (cx - 11, 33 + bob), 3, 2.6, coat)
+    if kind == "guildmaster":
+        lit_line(c, (cx + 14, 8 + bob), (cx + 14, 50 + bob), 1.2, 1.2, ramp("#6a4a2a"))                       # a walking staff with a lantern
+        lit_ellipse(c, cx + 14, 9 + bob, 2.6, 2.6, ramp("#ffd060"))
+    else:
+        lit_line(c, (cx + 13, 28 + bob), (cx + 13, 52 + bob), 1.0, 1.0, W if False else ramp("#d8d8e0"))       # a white cane
+    lit_ellipse(c, cx, 13 + bob, 6.5, 7, sk)
+    if kind == "guildmaster":
+        lit_ellipse(c, cx, 9 + bob, 12, 3.4, hat)                                                            # a wide-brimmed hat with a feather
+        lit_ellipse(c, cx, 6 + bob, 6.5, 5, hat)
+        lit_poly(c, [(cx + 4, 5 + bob), (cx + 12, 0 + bob), (cx + 9, 7 + bob)], R("sea"))
+        c.set(cx - 2, 14 + bob, (20, 14, 10, 255)); c.set(cx + 2, 14 + bob, (20, 14, 10, 255))
+        c.line(cx - 2, 18 + bob, cx + 2, 18 + bob, (120, 60, 50, 255))
+        lit_poly(c, [(cx - 6, 17 + bob), (cx + 6, 17 + bob), (cx + 4, 21 + bob), (cx - 4, 21 + bob)], R("bone"))   # a grey beard
+    else:
+        lit_poly(c, [(cx - 7, 11 + bob), (cx + 7, 11 + bob), (cx + 7, 15 + bob), (cx - 7, 15 + bob)], ramp("#16161c"))   # dark round spectacles over milky eyes
+        lit_ellipse(c, cx - 3, 13 + bob, 2.4, 2.4, ramp("#16161c")); lit_ellipse(c, cx + 3, 13 + bob, 2.4, 2.4, ramp("#16161c"))
+        c.set(cx - 3, 13 + bob, (210, 215, 225, 255)); c.set(cx + 3, 13 + bob, (210, 215, 225, 255))
+        lit_ellipse(c, cx, 6 + bob, 7.5, 4.5, hat)                                                           # a soft cap
+        lit_poly(c, [(cx - 7, 18 + bob), (cx + 7, 18 + bob), (cx + 9, 24 + bob), (cx - 9, 24 + bob)], R("sand"))      # a long scarf
+        lit_ellipse(c, cx - 12, 24 + bob, 2.4, 9, ramp("#8a6a40"))                                           # a map tube on the back
+    return finish(c, 0.35)
+
+
+def town_sheet(kind):
+    frames = []
+    for i in range(25):
+        if i == 0:
+            frames.append(_townfolk(kind, "idle", 0))
+        elif 1 <= i <= 15:
+            frames.append(_townfolk(kind, "walk", i))
+        elif i >= 21:
+            frames.append(_townfolk(kind, "attack", i))
+        else:
+            frames.append(_townfolk(kind, "idle", 0))
+    out = Canvas(40, 56 * 25)
+    for i, f in enumerate(frames):
+        out.paste(f, 0, i * 56)
+    return out
+
+
+def town_head(kind):
+    f = _townfolk(kind, "idle", 0)
+    out = Canvas(24, 24)
+    for y in range(24):
+        for x in range(24):
+            sx, sy = x + 8, y - 1
+            out.px[y * 24 + x] = f.px[sy * f.w + sx] if 0 <= sy < f.h and 0 <= sx < f.w else CLEAR
+    return finish(out, 0.35)

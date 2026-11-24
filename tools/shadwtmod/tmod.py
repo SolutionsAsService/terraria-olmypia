@@ -22,19 +22,19 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-from tlib import art, cs, psprite as ps, pyramid, sprites2 as s2, structs  # noqa: E402
+from tlib import art, cs, guild, psprite as ps, pyramid, sprites2 as s2, structs  # noqa: E402
 
 KNOWN = {  # vanilla names the generator relies on and is confident exist; anything else is reported as unverified
     "ItemID": {"BottledWater", "StoneBlock", "Obsidian", "Leather", "Feather", "Cobweb", "Gel", "Lens", "GoldBar", "IronBar", "Silk", "Cactus", "SandBlock", "Sandstone", "Bone", "LifeCrystal", "HealingPotion", "GreaterHealingPotion", "LesserHealingPotion", "SoulofFlight", "SoulofNight", "SoulofLight",
                "HallowedBar", "AdamantiteBar", "TitaniumBar", "Ruby", "Amber", "Topaz", "Sapphire", "Emerald", "Diamond", "Amethyst", "Cloud", "RainCloud", "FallenStar", "ShinyRedBalloon", "BandofRegeneration", "MagicMirror",
-               "GoldCoin", "SilverCoin", "PlatinumBar", "Torch", "Wood", "Chain", "Spike", "ManaPotion", "GreaterManaPotion", "Fireblossom", "Daybloom", "SpelunkerPotion", "IronskinPotion", "SwiftnessPotion", "AncientCloth"},
-    "NPCID": {"Zombie", "CaveBat", "Mummy", "DarkMummy", "LightMummy", "Skeleton", "Ghost", "Tumbleweed", "Antlion", "WalkingAntlion", "Vulture", "Wraith", "Mimic", "Pixie"},
+               "GoldCoin", "SilverCoin", "PlatinumBar", "Torch", "Wood", "Chain", "Rope", "CopperCoin", "BlueSlime", "Spike", "ManaPotion", "GreaterManaPotion", "Fireblossom", "Daybloom", "SpelunkerPotion", "IronskinPotion", "SwiftnessPotion", "AncientCloth"},
+    "NPCID": {"Bunny", "Guide", "BlueSlime", "Zombie", "CaveBat", "Mummy", "DarkMummy", "LightMummy", "Skeleton", "Ghost", "Tumbleweed", "Antlion", "WalkingAntlion", "Vulture", "Wraith", "Mimic", "Pixie"},
     "TileID": {"Bottles", "Rope", "Grass", "Dirt", "Stone", "Anvils", "Sandstone", "HardenedSand", "Sand", "Platforms", "Spikes", "Torches", "Containers", "WorkBenches", "Furnaces", "MythrilAnvil", "AdamantiteForge", "DemonAltar"},
     "DustID": {"Sand", "Torch", "IceTorch", "Gold", "BlueTorch", "YellowTorch", "Stone", "Fire", "Smoke"},
     "MusicID": {"Boss1", "Boss2", "Boss3", "Boss4", "Boss5", "Eclipse", "TheTowers", "LunarBoss", "PlanteraBattle"},
     "SoundID": {"Item1", "Item3", "Item5", "Item8", "Item14", "Item20", "Item43", "NPCHit1", "NPCHit54", "NPCDeath1", "NPCDeath6", "Roar", "Tink"},
-    "WallID": {"SandstoneBrick", "GrayBrick"},
-    "NPCAIStyleID": {"Fighter", "Bat"},
+    "WallID": {"SandstoneBrick", "GrayBrick", "Wood"},
+    "NPCAIStyleID": {"Fighter", "Bat", "Passive"},
     "ItemRarityID": {"White", "Blue", "Green", "Orange", "LightRed", "Pink", "LightPurple", "Lime", "Yellow", "Cyan", "Red", "Purple", "Expert"},
     "ItemUseStyleID": {"Swing", "Shoot", "HoldUp", "DrinkLiquid"},
     "MessageID": {"WorldData", "SpawnBossUseLicenseStartEvent"},
@@ -70,6 +70,8 @@ class Mod:
         self.npcs = jread(c / "npcs.json") or []
         self.structs = jread(c / "structures.json") or []
         self.buffs = jread(c / "buffs.json") or []
+        self.guild = jread(c / "guild.json")
+        self.townnpcs = jread(c / "townnpcs.json") or []
         self.out = self.root / self.name
 
     # all the items a tile contributes (the placeable block) join the item list
@@ -91,13 +93,96 @@ class Mod:
         return [b["flag"] for b in self.bosses()]
 
 
+def lint_guild(m, items, npcs):
+    """The guild's references resolve, the contracts can be played in some order, a final rank can be earned, and the discoveries have a source."""
+    g = m.guild
+    errors = []
+    if not g:
+        return errors
+    ranks, cons, dis = g.get("ranks", []), g.get("contracts", []), g.get("discoveries", [])
+    sids = {x["id"] for x in m.structs}
+    townids = {t["id"] for t in m.townnpcs}
+    if not ranks or ranks[0].get("rep") != 0:
+        errors.append("guild: the first rank must start at 0 reputation")
+    if [r["rep"] for r in ranks] != sorted(r["rep"] for r in ranks):
+        errors.append("guild: ranks must be in increasing reputation order")
+    dids = {d["id"] for d in dis}
+    cats = {d["category"] for d in dis}
+    for d in dis:
+        w = f"discovery {d['id']}"
+        if d.get("npc") and d["npc"] not in npcs:
+            errors.append(f"{w}: npc '{d['npc']}' does not exist")
+        if d.get("item") and d["item"] not in items:
+            errors.append(f"{w}: item '{d['item']}' does not exist")
+        if d.get("area") and d["area"] not in sids:
+            errors.append(f"{w}: area '{d['area']}' is not a structure")
+        if not (d.get("npc") or d.get("item") or d.get("area")):
+            errors.append(f"{w}: no way to find it (npc, item or area)")
+    seen = set()
+    total_rep = 2 * len(dis)
+    for c in cons:
+        w = f"contract {c['id']}"
+        if c["id"] in seen:
+            errors.append(f"duplicate {w}")
+        if not 1 <= c["rank"] <= len(ranks):
+            errors.append(f"{w}: rank {c['rank']} is not a guild rank")
+        if c["kind"] not in ("hunt", "collect", "discover", "discover_count", "talk"):
+            errors.append(f"{w}: unknown kind {c['kind']}")
+        if c["kind"] == "hunt":
+            tk = c["target"].split(":", 1)
+            if tk[0] == "mod" and tk[1] not in npcs:
+                errors.append(f"{w}: hunt target {c['target']} does not exist")
+        if c["kind"] == "collect" and c["item"].split(":", 1)[0] == "mod" and c["item"].split(":", 1)[1] not in items:
+            errors.append(f"{w}: collect item {c['item']} does not exist")
+        if c["kind"] == "discover" and c.get("discovery") not in dids:
+            errors.append(f"{w}: discovery '{c.get('discovery')}' does not exist")
+        if c["kind"] == "discover_count" and (c.get("category") not in cats or c.get("count", 0) > sum(1 for d in dis if d["category"] == c.get("category"))):
+            errors.append(f"{w}: category '{c.get('category')}' has fewer than {c.get('count')} discoveries")
+        if c.get("after") and c["after"] not in seen:
+            errors.append(f"{w}: 'after' {c['after']} must be an earlier contract")
+        for i, n in c.get("reward", {}).get("items", []):
+            if i.split(":", 1)[0] == "mod" and i.split(":", 1)[1] not in items:
+                errors.append(f"{w}: reward item {i} does not exist")
+        seen.add(c["id"])
+        total_rep += c["rep"]
+    if ranks and total_rep < ranks[-1]["rep"]:
+        errors.append(f"guild: the last rank needs {ranks[-1]['rep']} reputation but the contracts and discoveries give only {total_rep}")
+    # the order is playable: simulate a player who always takes the first available contract and finishes it
+    rep, done = 0, set()
+    for _ in range(len(cons) + 1):
+        rank = max(i for i, r in enumerate(ranks) if rep >= r["rep"])
+        nxt = next((c for c in cons if c["rank"] - 1 <= rank and c["id"] not in done and (not c.get("after") or c["after"] in done)), None)
+        if nxt is None:
+            break
+        done.add(nxt["id"])
+        rep += nxt["rep"] + 2 * (1 if nxt["kind"] in ("discover", "discover_count") else 0)
+    stuck = [c["id"] for c in cons if c["id"] not in done]
+    if stuck:
+        errors.append(f"guild: these contracts can never be offered (rank or 'after' never satisfied): {', '.join(stuck)}")
+    for t in m.townnpcs:
+        for i in t.get("shop", []):
+            ref_kind, ref_name = i.split(":", 1)
+            if ref_kind == "mod" and ref_name not in items:
+                errors.append(f"town npc {t['id']}: shop item {i} does not exist")
+        if t.get("clue_area") and t["clue_area"] not in sids:
+            errors.append(f"town npc {t['id']}: clue_area '{t['clue_area']}' is not a structure")
+        if t["role"] not in ("guild", "cartographer"):
+            errors.append(f"town npc {t['id']}: unknown role {t['role']}")
+    for it in m.items:
+        if it["kind"] == "map" and it.get("clue_area") not in sids:
+            errors.append(f"item {it['id']}: clue_area '{it.get('clue_area')}' is not a structure")
+    if not any(t["role"] == "guild" for t in m.townnpcs):
+        errors.append("guild: no Town NPC with role 'guild' hands out contracts")
+    return errors
+
+
 def lint(m):
     errors = []
     items = {i["id"] for i in m.all_items()}
     npcs = {n["id"] for n in m.npcs}
     projs = {p["id"] for p in m.projs}
     tiles = {t["id"] for t in m.tiles}
-    for what, ids in (("item", [i["id"] for i in m.all_items()]), ("npc", [n["id"] for n in m.npcs]), ("projectile", [p["id"] for p in m.projs]), ("tile", [t["id"] for t in m.tiles])):
+    for what, ids in (("item", [i["id"] for i in m.all_items()]), ("npc", [n["id"] for n in m.npcs + m.townnpcs]), ("projectile", [p["id"] for p in m.projs]), ("tile", [t["id"] for t in m.tiles])):
         seen = set()
         for i in ids:
             if not re.fullmatch(r"[A-Z][A-Za-z0-9]{2,40}", i):
@@ -123,7 +208,7 @@ def lint(m):
 
     for it in m.all_items():
         w = f"item {it['id']}"
-        if it["kind"] not in ("sword", "staff", "bow", "potion", "accessory", "material", "tile", "summon", "bag"):
+        if it["kind"] not in ("sword", "staff", "bow", "potion", "accessory", "material", "tile", "summon", "bag", "journal", "map", "artifact"):
             errors.append(f"{w}: unknown kind {it['kind']}")
         if it["kind"] == "staff" and it.get("shoot") not in projs:
             errors.append(f"{w}: shoots '{it.get('shoot')}', which is not a projectile")
@@ -156,8 +241,9 @@ def lint(m):
             if a.get("summon"):
                 npc_ref(a["summon"]["npc"], w)
     for t in m.tiles:
-        if t.get("pattern") not in ("brick", "golden", "hieroglyph", "lapis", "marble", "blackmarble", "meander", "bronze"):
+        if t.get("pattern") not in ("brick", "golden", "hieroglyph", "lapis", "marble", "blackmarble", "meander", "bronze", "timber", "shingle", "moss", "weathered"):
             errors.append(f"tile {t['id']}: unknown pattern {t.get('pattern')}")
+    errors += lint_guild(m, items, npcs)
     # structures: every room reachable, chests placed, tiles and spawn areas exist
     sids = {x["id"] for x in m.structs}
     for st in m.structs:
@@ -206,6 +292,8 @@ def item_sprite(it):
         "xiphos": lambda: s2.w_xiphos(p), "labrys": lambda: s2.w_labrys(p, it.get("accent", "wood")), "trident": lambda: s2.w_trident(p), "thunderbolt": lambda: s2.w_thunderbolt(p),
         "shield": lambda: s2.a_shield(p, a), "sandals": lambda: s2.a_sandals(p, a), "laurel": lambda: s2.a_laurel(p), "bar": lambda: s2.mat_bar(p), "potion": lambda: s2.potion(p, it.get("shape", "flask")),
         "horn": lambda: s2.s_horn(p), "mirror": lambda: s2.s_mirror(p, a), "flower": lambda: s2.mat_flower(p), "scale": lambda: s2.mat_scale(p), "bow": lambda: s2.w_bow(p),
+        "scroll": lambda: s2.item_scroll(p), "book": lambda: s2.item_book(p, a), "idol": lambda: s2.item_idol(p), "crown": lambda: s2.item_crown(p), "tablet": lambda: s2.item_tablet(p),
+        "lens": lambda: s2.item_lens(p), "medal": lambda: s2.item_medal(p, a), "compass": lambda: s2.item_compass(p),
         "eye": lambda: s2.a_eye(p, a), "cloak": lambda: s2.a_cloak(p), "disc": lambda: s2.a_disc(p), "scales": lambda: s2.s_scales(p, a), "relic": lambda: s2.s_relic(p, a), "offering": lambda: s2.s_offering(p, a),
     }
     if sp not in table:
@@ -217,13 +305,14 @@ def tile_canvas(t):
     pat = t["pattern"]
     base = t.get("palette", "sand")
     table = {"brick": lambda: s2.tile_brick(base), "golden": s2.tile_golden, "hieroglyph": s2.tile_hieroglyph, "lapis": s2.tile_lapis,
+             "timber": s2.tile_timber, "shingle": s2.tile_shingle, "moss": s2.tile_moss, "weathered": s2.tile_weathered,
              "marble": lambda: s2.tile_marble(False), "blackmarble": lambda: s2.tile_marble(True), "meander": s2.tile_meander, "bronze": s2.tile_bronze}
     if pat not in table:
         raise SpecError(f"tile {t.get('id')}: unknown pattern {pat}")
     return table[pat]()
 
 
-ENEMY_FRAMES = {"cobra": (s2.enemy_cobra, 3), "guardian": (s2.enemy_guardian, 3), "scarab": (s2.enemy_scarab, 4), "hoplite": (s2.enemy_hoplite, 3), "satyr": (s2.enemy_satyr, 3),
+ENEMY_FRAMES = {"cobra": (s2.enemy_cobra, 3), "guardian": (s2.enemy_guardian, 3), "scarab": (s2.enemy_scarab, 4), "fox": (s2.critter_fox, 7), "moonfox": (s2.critter_moonfox, 7), "deer": (s2.critter_deer, 7), "hedgehog": (s2.critter_hedgehog, 7), "frog": (s2.critter_frog, 7), "hoplite": (s2.enemy_hoplite, 3), "satyr": (s2.enemy_satyr, 3),
                 "cyclops": (s2.enemy_cyclops, 3), "bird": (s2.enemy_bird, 4), "snake": (s2.enemy_snake, 3)}
 BOSS_FNS = {"forgotten": s2.boss_forgotten, "anubis": s2.boss_anubis, "sun": s2.boss_sun, "minotaur": s2.boss_minotaur, "medusa": s2.boss_medusa, "zeus": s2.boss_zeus, "cerberus": s2.boss_cerberus, "hydra": s2.boss_hydra}
 
@@ -273,23 +362,30 @@ def gen(m):
             shutil.rmtree(out / sub, ignore_errors=True)
     files = {}
     for it in m.all_items():
-        files[f"Items/{it['id']}.cs"] = cs.item_cs(it)
+        files[f"Items/{it['id']}.cs"] = guild.item_cs(it) if it["kind"] in ("journal", "map", "artifact") else cs.item_cs(it)
     for t in m.tiles:
         files[f"Tiles/{t['id']}Tile.cs"] = cs.tile_cs(t)
     for p in m.projs:
         files[f"Projectiles/{p['id']}.cs"] = cs.projectile_cs(p)
     for n in m.npcs:
-        files[f"NPCs/{n['id']}.cs"] = cs.boss_cs(n) if n.get("boss") else cs.enemy_cs(n)
+        files[f"NPCs/{n['id']}.cs"] = cs.boss_cs(n) if n.get("boss") else (guild.critter_cs(n) if n.get("ai") == "critter" else cs.enemy_cs(n))
+    for n in m.townnpcs:
+        files[f"NPCs/{n['id']}.cs"] = guild.town_npc_cs(n)
+    if m.guild:
+        files["Systems/GuildData.cs"] = guild.data_cs(m.guild, [st["id"] for st in m.structs])
+        files["Systems/GuildPlayer.cs"] = guild.player_cs()
+        files["Systems/GuildGlobalNPC.cs"] = guild.global_npc_cs()
     areas = [st["id"] for st in m.structs]
     files["Systems/KhemetWorld.cs"] = cs.world_cs(m.flags(), areas)
-    for st in m.structs:
+    for si, st in enumerate(m.structs):
         bp = structs.build(st)
         files[f"Systems/{st['id']}Blueprint.cs"] = cs.blueprint_cs(bp, st["id"])
-        files[f"Systems/{st['id']}GenSystem.cs"] = cs.structure_gen_cs(st, bp)
+        before = [o["id"] for o in m.structs[:si] if o.get("site", "desert") == st.get("site", "desert") and st.get("site", "desert") != "underground"]
+        files[f"Systems/{st['id']}GenSystem.cs"] = cs.structure_gen_cs(st, bp, before)
     for bf in m.buffs:
         files[f"Buffs/{bf['id']}.cs"] = cs.buff_cs(bf)
     files["KhemetMod.cs"] = cs.mod_cs()
-    files["Localization/en-US_Mods.Khemet.hjson"] = cs.hjson(m.all_items(), m.tiles, m.npcs, m.projs, m.buffs)
+    files["Localization/en-US_Mods.Khemet.hjson"] = cs.hjson(m.all_items(), m.tiles, m.npcs + m.townnpcs, m.projs, m.buffs)
     meta = m.meta
     files["build.txt"] = f"displayName = {meta.get('display', ns)}\nauthor = {meta.get('author', 'SolutionsAsService')}\nversion = {meta.get('version', '0.1.0')}\nbuildIgnore = *.csproj, *.user, obj\\*, bin\\*, .vs\\*\n"
     files["description.txt"] = meta.get("description", ns) + "\n"
@@ -321,6 +417,9 @@ def gen(m):
         ps.tile_sheet(tile_canvas(t)).save(out / f"Tiles/{t['id']}Tile.png")
     for p in m.projs:
         proj_sprite(p).save(out / f"Projectiles/{p['id']}.png")
+    for n in m.townnpcs:
+        s2.town_sheet(n["sprite"]).save(out / f"NPCs/{n['id']}.png")
+        s2.town_head(n["sprite"]).save(out / f"NPCs/{n['id']}_Head.png")
     for n in m.npcs:
         npc_sheet(n).save(out / f"NPCs/{n['id']}.png")
         if n.get("boss"):
@@ -360,7 +459,7 @@ def preview(m):
     cells = []
     for n in m.enemies():
         sh = npc_sheet(n)
-        nf = 4 if n["sprite"] in ("scarab", "bird") else 3
+        nf = 4 if n["sprite"] in ("scarab", "bird") else (7 if n.get("ai") == "critter" else 3)
         fh = sh.h // nf
         for i in range(nf):
             f = ps.Canvas(sh.w, fh)
@@ -381,12 +480,19 @@ def preview(m):
     first = []
     for n in m.enemies() + m.bosses():
         sh = npc_sheet(n)
-        nf = 4 if n["sprite"] in ("scarab", "bird") or n.get("boss") else 3
+        nf = 4 if n["sprite"] in ("scarab", "bird") or n.get("boss") else (7 if n.get("ai") == "critter" else 3)
         fh = sh.h // nf
         f = ps.Canvas(sh.w, fh)
         for y in range(fh):
             for x in range(sh.w):
                 f.px[y * sh.w + x] = sh.px[y * sh.w + x]
+        first.append((n["id"], f))
+    for n in m.townnpcs:
+        sh = s2.town_sheet(n["sprite"])
+        f = ps.Canvas(40, 56)
+        for y in range(56):
+            for x in range(40):
+                f.px[y * 40 + x] = sh.px[y * 40 + x]
         first.append((n["id"], f))
     everything = [(i["id"], item_sprite(i)) for i in m.items if i["kind"] != "tile"] + [(t["id"], tile_canvas(t)) for t in m.tiles] + [(p["id"], proj_sprite(p)) for p in m.projs] + [(b["id"], buff_sprite(b)) for b in m.buffs] + first
     board([art.silhouette(c) for _, c in everything], 3, (200, 200, 210, 255), pv / "silhouettes.png", wrap=1100)
@@ -424,7 +530,7 @@ def ids_cs(names):
         if cls == "ItemID":
             extra = "        public static class Sets { public static bool[] BossBag = new bool[10000]; public static bool[] PreHardmodeLikeBossBag = new bool[10000]; public static int[] SortingPriorityBossSpawns = new int[10000]; }"
         if cls == "NPCID":
-            extra = "        public static class Sets { public static bool[] MPAllowedEnemies = new bool[10000]; }"
+            extra = "        public static class Sets { public static bool[] MPAllowedEnemies = new bool[10000]; public static bool[] CountsAsCritter = new bool[10000]; public static int[] ExtraFramesCount = new int[10000]; public static int[] AttackFrameCount = new int[10000]; public static int[] DangerDetectRange = new int[10000]; public static int[] AttackType = new int[10000]; public static int[] AttackTime = new int[10000]; public static int[] AttackAverageChance = new int[10000]; public static int[] HatOffsetY = new int[10000]; }"
         lines += [f"    public static class {cls}", "    {", *decl, extra, "    }"]
     lines.append("}")
     return "\n".join(lines) + "\n"

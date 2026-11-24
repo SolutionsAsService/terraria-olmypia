@@ -1,7 +1,8 @@
 """structs: blueprints for the structures a mod can place in the world, and one entry point `build(spec)` that returns the blueprint dict.
 
 Kinds: grand_pyramid (a stepped desert pyramid, see pyramid.py), greek_temple (a surface temple with a colonnade, a cella and a crypt),
-labyrinth (an underground maze with a lair at its centre, a rope shaft to the surface and chests in the dead ends).
+labyrinth (an underground maze with a lair at its centre, a rope shaft to the surface and chests in the dead ends),
+guild_hall (a two-storey timber hall: a main hall, a registry, a loft trophy room and storage chests), ruined_shrine (a small broken stone shrine with a sunken relic chamber).
 
 A blueprint dict has: width, height, ground_row (the row the surface sits on; 0 for an underground structure), rows (one string per row, one character per tile),
 rooms {name: (x0, y0, x1, y1)}, chests [(x, y, role)], entrance (x, y), and kind-specific extras. Characters: ' ' untouched, '.' air with the back wall, 'w' air with the
@@ -19,6 +20,10 @@ def build(spec):
         return greek_temple(spec)
     if kind == "labyrinth":
         return labyrinth(spec)
+    if kind == "guild_hall":
+        return guild_hall(spec)
+    if kind == "ruined_shrine":
+        return ruined_shrine(spec)
     raise ValueError(f"unknown structure kind {kind}")
 
 
@@ -186,3 +191,116 @@ def labyrinth(spec=None):
     for k, (x, y, role) in enumerate(chests):
         rooms[f"chest_{k}"] = (x, y, x + 1, y + 1)
     return {"width": W, "height": H, "ground_row": 0, "rows": ["".join(r) for r in g], "rooms": rooms, "chests": chests, "entrance": entrance, "platforms": [], "arena": rooms["minotaur_lair"]}
+
+
+def _grid(W, R):
+    g = [[" "] * W for _ in range(R)]
+
+    def fill(x0, x1, y0, y1, ch):
+        for y in range(y0, y1 + 1):
+            for x in range(x0, x1 + 1):
+                if 0 <= x < W and 0 <= y < R:
+                    g[y][x] = ch
+    return g, fill
+
+
+def _put_chest(g, chests, x, floor_row, role):
+    y = floor_row - 2
+    if all(g[y + dy][x + dx] == "." for dy in (0, 1) for dx in (0, 1)) and g[floor_row][x] in "BLGp":
+        g[y][x] = "C"
+        g[y][x + 1] = g[y + 1][x] = g[y + 1][x + 1] = "c"
+        chests.append((x, y, role))
+
+
+def guild_hall(spec=None):
+    """The Adventurer's Guild Hall: a timber hall with a pitched shingle roof. Ground floor = the main hall (board, registry) with a doorway at each end; a loft over the
+    western half (the trophy room) reached by a rope; storage chests in the main hall and loft. B timber, G floor boards, H shingles, L (unused)."""
+    spec = spec or {}
+    W, A, D = spec.get("width", 41), 16, 3
+    R = A + D
+    g, fill = _grid(W, R)
+    floor = A - 1
+    fill(0, W - 1, A, R - 1, "B")                                     # the foundation
+    fill(0, W - 1, floor + 0, floor + 0, "G") if False else None
+    fill(0, W - 1, A - 1, A - 1, "G")                                 # the floor boards: the hall floor is row A-1, its surface is the row above
+    floor = A - 1
+    top = floor - 11                                                  # interior rows top .. floor-1
+    fill(0, 1, top, floor - 1, "B"); fill(W - 2, W - 1, top, floor - 1, "B")     # end walls, two thick
+    fill(2, W - 3, top, floor - 1, ".")
+    fill(0, 1, floor - 4, floor - 1, "."); fill(W - 2, W - 1, floor - 4, floor - 1, ".")    # a doorway at each end, four rows tall
+    # the pitched roof: courses of shingles narrowing to a ridge
+    for k in range(9):
+        fill(k, W - 1 - k, top - 1 - k, top - 1 - k, "H")
+        if k:
+            fill(k + 1, W - 2 - k, top - 1 - k + 1, top - 1 - k + 1, "." if k < 8 else ".")
+    fill(1, W - 2, top - 1, top - 1, "H")                                       # the eaves line
+    # the loft over the western half, a floor with an opening for the rope
+    loft = top + 5
+    fill(2, 17, loft, loft, "G")
+    fill(14, 15, loft, loft, "p")                                               # a platform hatch beside the rope
+    for y in range(loft, floor):
+        g[y][16] = "R"
+    # a partition: the registry (left of the middle) is the open ground below the loft; the board stands in the centre
+    fill(24, 24, floor - 7, floor - 5, "B")                                     # the quest board (a hanging timber slab)
+    fill(23, 25, floor - 8, floor - 8, "B")
+    for x in (6, 20, 34):
+        g[floor - 8][x] = "T"
+    g[loft - 5][8] = "T"; g[loft - 5][12] = "T"
+    # the roof space above the loft is open attic: ".".
+    chests = []
+    _put_chest(g, chests, 28, floor, "storage")
+    _put_chest(g, chests, 33, floor, "storage")
+    _put_chest(g, chests, 4, loft, "trophy")
+    _put_chest(g, chests, 9, loft, "trophy")
+    rooms = {"main_hall": (2, top, W - 3, floor - 1), "registry": (2, loft + 1, 17, floor - 1), "loft": (2, top, 17, loft - 1), "west_door": (0, floor - 4, 1, floor - 1), "east_door": (W - 2, floor - 4, W - 1, floor - 1)}
+    return {"width": W, "height": R, "ground_row": A, "rows": ["".join(r) for r in g], "rooms": rooms, "chests": chests, "entrance": (0, floor - 1), "platforms": []}
+
+
+def ruined_shrine(spec=None):
+    """A small ruined stone shrine, 31 wide: a broken wall of three sections with gaps, two stumps of columns, an altar, and a stair down to a sunken relic chamber.
+    B stone (ruin), G mossy stone, H weathered column stone, L (unused). Deterministic: the gaps are fixed so the picture is the structure."""
+    spec = spec or {}
+    W, A, D = spec.get("width", 31), 10, 14
+    R = A + D
+    g, fill = _grid(W, R)
+    cx = W // 2
+    fill(0, W - 1, A, A + 2, "B")                                         # the old platform
+    fill(2, W - 3, A - 1, A - 1, "G")                                     # a mossy court one row above the ground
+    floor = A - 1
+    fill(1, W - 2, A - 8, floor - 1, ".")                                 # the air inside the walls, with the back wall
+    # broken walls: west and east, with different ruined heights
+    west_h = [7, 7, 5, 3, 2, 2, 1]
+    for i, h in enumerate(west_h):
+        fill(1 + i // 3, 1 + i // 3, floor - h, floor - 1, "B") if i % 3 == 0 else None
+    fill(1, 2, floor - 7, floor - 1, "B"); fill(W - 3, W - 2, floor - 4, floor - 1, "B")
+    fill(1, 2, floor - 3, floor - 1, ".")                                 # a doorway low in the west wall, three rows tall
+    # two broken columns and two whole
+    for x, h in ((7, 7), (11, 3), (19, 6), (23, 2)):
+        fill(x, x + 1, floor - h, floor - 1, "H")
+    # the altar and its brazier
+    fill(cx - 2, cx + 2, floor - 2, floor - 1, "G"); fill(cx - 1, cx + 1, floor - 3, floor - 3, "G")
+    g[floor - 5][cx - 4] = "T"; g[floor - 5][cx + 4] = "T"
+    # the stair: a 3-wide shaft beside the altar down to the chamber, with platforms every four rows
+    fill(cx + 4, cx + 6, floor, A + 6, ".")
+    for y in range(A + 3, A + 7, 3):
+        for x in range(cx + 4, cx + 7):
+            g[y][x] = "p"
+    # the sunken chamber
+    fill(cx - 9, cx + 9, A + 7, A + 12, ".")
+    fill(cx - 10, cx + 10, A + 13, A + 13, "B")
+    for y in range(A + 3, A + 14):
+        for x in range(cx - 11, cx + 12):
+            if g[y][x] == " ":
+                g[y][x] = "B"
+    fill(cx + 4, cx + 6, A + 3, A + 6, ".")
+    fill(cx + 4, cx + 6, floor, A + 2, ".")
+    for x in range(cx + 4, cx + 7):
+        g[A + 3][x] = "p"
+    for y in (A + 8, A + 11):
+        g[y][cx - 8] = "T"
+    chests = []
+    _put_chest(g, chests, cx - 7, A + 13, "relic_a")
+    _put_chest(g, chests, cx - 2, A + 13, "relic_b")
+    _put_chest(g, chests, cx + 3, A + 13, "relic_c")
+    rooms = {"court": (2, A - 8, W - 3, floor - 1), "stair": (cx + 4, floor, cx + 6, A + 6), "chamber": (cx - 9, A + 7, cx + 9, A + 12)}
+    return {"width": W, "height": R, "ground_row": A, "rows": ["".join(r) for r in g], "rooms": rooms, "chests": chests, "entrance": (0, floor - 1), "platforms": []}

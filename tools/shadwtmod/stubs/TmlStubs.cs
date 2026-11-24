@@ -71,6 +71,12 @@ namespace Terraria
         public static bool[] buffNoSave = new bool[10000];
         public static double rockLayer;
         public static int maxTilesY;
+        public static int maxNPCs = 200;
+        public static NPC[] npc = new NPC[201];
+        public static bool dayTime;
+        public static string npcChatText;
+        public static Player LocalPlayer => player[myPlayer];
+        public static void NewText(string text, byte r = 255, byte g = 255, byte b = 255) { }
     }
     public class Item
     {
@@ -80,6 +86,9 @@ namespace Terraria
         public Terraria.Audio.SoundStyle? UseSound;
         public bool autoReuse, noMelee, accessory, consumable, expert;
         public const int CommonMaxStack = 9999;
+        public int type;
+        public bool IsAir => false;
+        public void TurnToAir(bool fullReset = false) { }
         public int ResearchUnlockCount;
         public void DefaultToPlaceableTile(int type) { }
         public void SetDefaults(int type) { }
@@ -92,13 +101,15 @@ namespace Terraria
         public float knockBackResist, value, npcSlots;
         public double frameCounter;
         public Rectangle frame;
-        public bool noGravity, noTileCollide, boss, lavaImmune, collideX, collideY;
+        public bool noGravity, noTileCollide, boss, lavaImmune, collideX, collideY, active, townNPC, friendly;
+        public float Distance(Vector2 other) => 0f;
         public Terraria.Audio.SoundStyle? HitSound, DeathSound;
         public Vector2 velocity, Center, Bottom;
         public float rotation;
         public float[] ai = new float[4];
         public struct HitModifiers { public StatModifier FinalDamage; }
         public static bool AnyNPCs(int type) => false;
+        public static int maxNPCs = 200;
         public static void SpawnOnPlayer(int plr, int type) { }
         public static int NewNPC(Terraria.DataStructures.IEntitySource source, int x, int y, int type) => 0;
         public void TargetClosest(bool faceTarget = true) { }
@@ -114,6 +125,10 @@ namespace Terraria
         public class HurtInfo { }
         public void AddBuff(int type, int time) { }
         public Vector2 position, Center;
+        public Item[] inventory = new Item[59];
+        public T GetModPlayer<T>() where T : ModPlayer, new() => new T();
+        public Terraria.DataStructures.IEntitySource GetSource_GiftOrReward() => null;
+        public int QuickSpawnItem(Terraria.DataStructures.IEntitySource source, int type, int stack = 1) => 0;
         private StatModifier dmg; private float crit;
         public ref StatModifier GetDamage(DamageClass c) => ref dmg;
         public ref float GetCritChance(DamageClass c) => ref crit;
@@ -174,6 +189,8 @@ namespace Terraria.ModLoader.IO
         public object this[string key] { get => null; set { } }
         public bool ContainsKey(string key) => false;
         public int GetInt(string key) => 0;
+        public string GetString(string key) => "";
+        public IList<T> GetList<T>(string key) => new List<T>();
     }
 }
 namespace Terraria.GameContent.ItemDropRules
@@ -208,6 +225,20 @@ namespace Terraria.ModLoader
         public static int BuffType<T>() where T : ModBuff => 0;
     }
     public class AutoloadBossHeadAttribute : Attribute { }
+    public class AutoloadHeadAttribute : Attribute { }
+    public class NPCShop { public NPCShop(int npcType, string name = "Shop") { } public NPCShop Add(int itemType) => this; public NPCShop Register() => this; }
+    public abstract class ModPlayer
+    {
+        public Player Player = new Player();
+        public virtual void ResetEffects() { }
+        public virtual void SaveData(TagCompound tag) { }
+        public virtual void LoadData(TagCompound tag) { }
+        public virtual void PostUpdate() { }
+    }
+    public abstract class GlobalNPC
+    {
+        public virtual void OnKill(NPC npc) { }
+    }
     public abstract class ModItem
     {
         public Item Item = new Item();
@@ -237,6 +268,16 @@ namespace Terraria.ModLoader
         public virtual void OnKill() { }
         public virtual float SpawnChance(NPCSpawnInfo spawnInfo) => 0f;
         public virtual void ApplyDifficultyAndPlayerScaling(int numPlayers, float balance, float bossAdjustment) { }
+        public virtual bool CanTownNPCSpawn(int numTownNPCs) => false;
+        public virtual List<string> SetNPCNameList() => new List<string>();
+        public virtual string GetChat() => "";
+        public virtual void SetChatButtons(ref string button, ref string button2) { }
+        public virtual void OnChatButtonClicked(bool firstButton, ref string shopName) { }
+        public virtual void AddShops() { }
+        public virtual void TownNPCAttackStrength(ref int damage, ref float knockback) { }
+        public virtual void TownNPCAttackCooldown(ref int cooldown, ref int randExtraCooldown) { }
+        public virtual void TownNPCAttackProj(ref int projType, ref int attackDelay) { }
+        public virtual void TownNPCAttackProjSpeed(ref float multiplier, ref float gravityCorrection, ref float randomOffset) { }
     }
     public abstract class ModTile
     {

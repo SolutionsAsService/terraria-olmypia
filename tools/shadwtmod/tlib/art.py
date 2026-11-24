@@ -176,3 +176,85 @@ def label(c, text, x, y, colour=(255, 255, 255, 255), k=2):
                         for xx in range(k):
                             c.set(x + (i % 3) * k + xx, y + (i // 3) * k + yy, colour)
         x += 4 * k
+
+
+# ---------------------------------------------------------------- the Calamity study (2026-11-24): what separates a polished mod sprite from a flat one
+# Measured over 1,100 Calamity sprites: about 11 to 14 colours each, no semi-transparent pixels, weapons about 56 by 58, a full dark tinted outline, mottled surfaces,
+# one accent hue glowing against a muted body, ragged silhouettes. These passes add that to any canvas: texture, chip, rim, quantize.
+def _hash(x, y, seed):
+    h = (x * 73856093) ^ (y * 19349663) ^ (seed * 83492791)
+    h = (h ^ (h >> 13)) * 1274126177 & 0xFFFFFFFF
+    return (h ^ (h >> 16)) & 0xFFFF
+
+
+def texture(c, amount=0.35, seed=1, cell=3, step=0.08):
+    """Mottle the surface: clusters of 2 by 2 pixels step a little lighter or darker, so a band is not a flat polygon."""
+    for y in range(c.h):
+        for x in range(c.w):
+            p = c.px[y * c.w + x]
+            if p[3] == 0:
+                continue
+            hv = _hash(x // cell, y // cell, seed)
+            if hv % 1000 < amount * 1000:
+                k = 1.0 + step if (hv >> 10) & 1 else 1.0 - step
+                c.px[y * c.w + x] = (min(255, int(p[0] * k)), min(255, int(p[1] * k)), min(255, int(p[2] * k)), 255)
+
+
+def chip(c, amount=0.12, seed=3):
+    """Ragged edges: remove some convex corner pixels so the silhouette is not machine-clean."""
+    src = list(c.px)
+    for y in range(c.h):
+        for x in range(c.w):
+            if src[y * c.w + x][3] == 0:
+                continue
+            n = [src[(y + dy) * c.w + x + dx][3] == 0 if 0 <= x + dx < c.w and 0 <= y + dy < c.h else True for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))]
+            if sum(n) >= 2 and _hash(x, y, seed) % 1000 < amount * 1000 and ((n[0] and n[2]) or (n[0] and n[3]) or (n[1] and n[2]) or (n[1] and n[3])):
+                c.px[y * c.w + x] = (0, 0, 0, 0)
+
+
+def rim(c, tint=(255, 240, 210), strength=0.35):
+    """A rim light: opaque edge pixels facing away from the key light (lower right) are lifted toward a warm tint."""
+    src = list(c.px)
+    for y in range(c.h):
+        for x in range(c.w):
+            p = src[y * c.w + x]
+            if p[3] == 0:
+                continue
+            nx = src[y * c.w + x + 1][3] == 0 if x + 1 < c.w else True
+            ny = src[(y + 1) * c.w + x][3] == 0 if y + 1 < c.h else True
+            if nx or ny:
+                c.px[y * c.w + x] = tuple(int(p[i] + (tint[i] - p[i]) * strength) for i in range(3)) + (255,)
+
+
+def quantize(c, n=16):
+    """Median-cut the opaque colours down to n, so a sprite keeps a tight palette (Calamity's median is 11 to 14)."""
+    pts = [p[:3] for p in c.px if p[3] > 0]
+    if len({q for q in pts}) <= n:
+        return
+    boxes = [pts]
+    while len(boxes) < n:
+        boxes.sort(key=lambda b: -len(set(b)))
+        b = boxes.pop(0)
+        if len(set(b)) < 2:
+            boxes.append(b)
+            break
+        ch = max(range(3), key=lambda i: max(q[i] for q in b) - min(q[i] for q in b))
+        b.sort(key=lambda q: q[ch])
+        m = len(b) // 2
+        boxes += [b[:m], b[m:]]
+    pal = [tuple(sum(q[i] for q in b) // len(b) for i in range(3)) for b in boxes if b]
+    for i, p in enumerate(c.px):
+        if p[3] > 0:
+            c.px[i] = min(pal, key=lambda q: (q[0] - p[0]) ** 2 + (q[1] - p[1]) ** 2 + (q[2] - p[2]) ** 2) + (255,)
+
+
+def polish(c, seed=1, ncolors=16, tex=0.35, chipping=0.10, rimlight=True, outline=0.30):
+    """The whole finishing pipeline, in the order that matters: texture, chip, rim, outline, then quantize to a tight palette."""
+    texture(c, tex, seed)
+    if chipping:
+        chip(c, chipping, seed + 2)
+    if rimlight:
+        rim(c)
+    outline_sel(c, outline)
+    quantize(c, ncolors)
+    return c

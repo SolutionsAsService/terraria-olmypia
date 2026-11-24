@@ -942,6 +942,8 @@ def _accessory_lines(fx):
         out.append("player.noFallDmg = true;")
     if fx.get("no_knockback"):
         out.append("player.noKnockback = true;")
+    if fx.get("observe"):
+        out.append("player.GetModPlayer<Systems.GuildPlayer>().Observe = true;")
     if "desert_damage" in fx:
         out.append(f"if (player.ZoneDesert) {{ player.GetDamage(DamageClass.Generic) += {f(fx['desert_damage'])}; }}")
     return out
@@ -1584,7 +1586,7 @@ def blueprint_cs(bp, sid="Pyramid"):
 DEFAULT_TILES = {"B": "PharaohBrick", "G": "GoldenSandstone", "H": "HieroglyphBrick", "L": "LapisInlay"}
 
 
-def structure_gen_cs(spec, bp):
+def structure_gen_cs(spec, bp, others=()):
     sid = spec["id"]
     site = spec.get("site", "desert")
     tmap = spec.get("tile_map", DEFAULT_TILES)
@@ -1600,6 +1602,7 @@ def structure_gen_cs(spec, bp):
     cells = "\n".join(f'            new int[] {{ {x}, {y} }},' for (x, y, _) in bp["chests"])
     role_names = ", ".join(f'"{r}"' for (_, _, r) in bp["chests"])
     tiles = "\n            ".join(f"tiles['{ch}'] = ModContent.TileType<Tiles.{tid}Tile>();" for ch, tid in tmap.items())
+    overlap = "".join(f"                if (Systems.KhemetWorld.{o}Area.Width > 0 && x0 < Systems.KhemetWorld.{o}Area.X + Systems.KhemetWorld.{o}Area.Width + 12 && x0 + W + 12 > Systems.KhemetWorld.{o}Area.X)\n                {{\n                    continue;\n                }}\n" for o in others)
     ex, ey = bp["entrance"]
     if site == "underground":
         locate = f"""            int x0 = WorldGen.genRand.Next(Main.maxTilesX / 6, Main.maxTilesX * 5 / 6 - W);
@@ -1618,7 +1621,7 @@ def structure_gen_cs(spec, bp):
             for (int attempt = 0; attempt < 400; attempt++)
             {{
                 int x0 = WorldGen.genRand.Next(Main.maxTilesX / 8, Main.maxTilesX * 7 / 8 - W);
-                int sand = 0;
+{overlap}                int sand = 0;
                 int ground = 0;
                 int count = 0;
                 int minY = int.MaxValue;
