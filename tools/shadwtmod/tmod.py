@@ -22,7 +22,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-from tlib import cs, psprite as ps, pyramid, structs  # noqa: E402
+from tlib import art, cs, psprite as ps, pyramid, sprites2 as s2, structs  # noqa: E402
 
 KNOWN = {  # vanilla names the generator relies on and is confident exist; anything else is reported as unverified
     "ItemID": {"BottledWater", "StoneBlock", "Obsidian", "Leather", "Feather", "Cobweb", "Gel", "Lens", "GoldBar", "IronBar", "Silk", "Cactus", "SandBlock", "Sandstone", "Bone", "LifeCrystal", "HealingPotion", "GreaterHealingPotion", "LesserHealingPotion", "SoulofFlight", "SoulofNight", "SoulofLight",
@@ -196,84 +196,73 @@ def lint(m):
 
 # ---------------------------------------------------------------- sprites
 def item_sprite(it):
-    p = ps.pal(it.get("palette", "gold"))
-    a = ps.pal(it.get("accent", "gold"))
+    """Items are drawn by tlib/sprites2 (lit primitives, one light, five-tone ramps)."""
+    p = it.get("palette", "gold")
+    a = it.get("accent", "gold")
     sp = it.get("sprite")
-    table = {"khopesh": lambda: ps.item_khopesh(p), "staff": lambda: ps.item_staff(ps.pal(it.get("palette", "wood")), ps.pal(it.get("accent", "sun"))), "ankh": lambda: ps.item_ankh(p),
-             "charm": lambda: ps.item_charm(p, a), "shard": lambda: ps.item_shard(p), "cartouche": lambda: ps.item_cartouche(p, a), "bag": lambda: ps.item_bag(p, a),
-             "xiphos": lambda: ps.item_xiphos(p), "labrys": lambda: ps.item_labrys(p, ps.pal(it.get("accent", "wood"))), "trident": lambda: ps.item_trident(p), "thunderbolt": lambda: ps.item_thunderbolt(p),
-             "shield": lambda: ps.item_shield(p, a), "sandals": lambda: ps.item_sandals(p, a), "laurel": lambda: ps.item_laurel(p), "bar": lambda: ps.item_bar(p), "potion": lambda: ps.item_potion(p),
-             "horn": lambda: ps.item_horn(p), "mirror": lambda: ps.item_mirror(p, a), "flower": lambda: ps.item_flower(p), "scale": lambda: ps.item_scale(p), "bow": lambda: ps.item_bow(p)}
+    table = {
+        "khopesh": lambda: s2.w_khopesh(p), "staff": lambda: s2.w_staff(it.get("palette", "wood"), it.get("accent", "sun")), "ankh": lambda: s2.a_ankh(p),
+        "charm": lambda: s2.a_charm(p, a), "shard": lambda: s2.mat_shard(p), "cartouche": lambda: s2.s_cartouche(p, a), "bag": lambda: s2.s_bag(p, a),
+        "xiphos": lambda: s2.w_xiphos(p), "labrys": lambda: s2.w_labrys(p, it.get("accent", "wood")), "trident": lambda: s2.w_trident(p), "thunderbolt": lambda: s2.w_thunderbolt(p),
+        "shield": lambda: s2.a_shield(p, a), "sandals": lambda: s2.a_sandals(p, a), "laurel": lambda: s2.a_laurel(p), "bar": lambda: s2.mat_bar(p), "potion": lambda: s2.potion(p, it.get("shape", "flask")),
+        "horn": lambda: s2.s_horn(p), "mirror": lambda: s2.s_mirror(p, a), "flower": lambda: s2.mat_flower(p), "scale": lambda: s2.mat_scale(p), "bow": lambda: s2.w_bow(p),
+        "eye": lambda: s2.a_eye(p, a), "cloak": lambda: s2.a_cloak(p), "disc": lambda: s2.a_disc(p), "scales": lambda: s2.s_scales(p, a), "relic": lambda: s2.s_relic(p, a), "offering": lambda: s2.s_offering(p, a),
+    }
+    if sp not in table:
+        raise SpecError(f"item {it.get('id')}: unknown sprite {sp}")
     return table[sp]()
 
 
 def tile_canvas(t):
     pat = t["pattern"]
-    pl = ps.pal(t.get("palette", "sand"))
-    ac = ps.pal(t["accent"]) if t.get("accent") else None
-    if pat in ("marble", "blackmarble", "meander", "bronze"):
-        return ps.tile16_greek(pat, pl, ac)
-    return ps.tile16(pat, pl, ac)
+    base = t.get("palette", "sand")
+    table = {"brick": lambda: s2.tile_brick(base), "golden": s2.tile_golden, "hieroglyph": s2.tile_hieroglyph, "lapis": s2.tile_lapis,
+             "marble": lambda: s2.tile_marble(False), "blackmarble": lambda: s2.tile_marble(True), "meander": s2.tile_meander, "bronze": s2.tile_bronze}
+    if pat not in table:
+        raise SpecError(f"tile {t.get('id')}: unknown pattern {pat}")
+    return table[pat]()
+
+
+ENEMY_FRAMES = {"cobra": (s2.enemy_cobra, 3), "guardian": (s2.enemy_guardian, 3), "scarab": (s2.enemy_scarab, 4), "hoplite": (s2.enemy_hoplite, 3), "satyr": (s2.enemy_satyr, 3),
+                "cyclops": (s2.enemy_cyclops, 3), "bird": (s2.enemy_bird, 4), "snake": (s2.enemy_snake, 3)}
+BOSS_FNS = {"forgotten": s2.boss_forgotten, "anubis": s2.boss_anubis, "sun": s2.boss_sun, "minotaur": s2.boss_minotaur, "medusa": s2.boss_medusa, "zeus": s2.boss_zeus}
 
 
 def npc_sheet(n):
     sp = n["sprite"]
-    if sp == "cobra":
-        return ps.sheet([ps.enemy_cobra(i) for i in range(3)])
-    if sp == "guardian":
-        return ps.sheet([ps.enemy_guardian(i) for i in range(3)])
-    if sp == "scarab":
-        return ps.sheet([ps.enemy_scarab(i) for i in range(4)])
-    if sp in ("hoplite", "satyr", "cyclops"):
-        return ps.sheet([ps.enemy_humanoid(i, sp, *n["size"]) for i in range(3)])
-    if sp == "bird":
-        return ps.sheet([ps.enemy_bird(i, *n["size"]) for i in range(4)])
-    if sp == "snake":
-        return ps.sheet([ps.enemy_snake(i, *n["size"]) for i in range(3)])
+    if sp in ENEMY_FRAMES:
+        fn, k = ENEMY_FRAMES[sp]
+        return ps.sheet([fn(i) for i in range(k)])
     if sp.startswith("boss:"):
-        w, h = n["size"]
         kind = sp.split(":")[1]
-        if kind == "minotaur":
-            return ps.sheet([ps.boss_minotaur(i, w, h) for i in range(4)])
-        if kind in ("medusa", "zeus"):
-            return ps.sheet([ps.boss_olympian(i, kind, w, h) for i in range(4)])
-        return ps.sheet([ps.boss_pharaoh(i, kind, w, h) for i in range(4)])
+        if kind not in BOSS_FNS:
+            raise SpecError(f"npc {n['id']}: unknown boss sprite {sp}")
+        return ps.sheet([BOSS_FNS[kind](i, *n["size"]) for i in range(4)])
     raise SpecError(f"npc {n['id']}: unknown sprite {sp}")
 
 
 def boss_frame(kind, i, w, h):
-    if kind == "minotaur":
-        return ps.boss_minotaur(i, w, h)
-    if kind in ("medusa", "zeus"):
-        return ps.boss_olympian(i, kind, w, h)
-    return ps.boss_pharaoh(i, kind, w, h)
+    return BOSS_FNS[kind](i, w, h)
 
 
 def boss_head(kind):
-    c = boss_frame(kind, 0, 96, 104)
-    out = ps.Canvas(24, 24)
-    # the head and shoulders: the top 60% of the sprite, scaled to 24 by 24
-    for y in range(24):
-        for x in range(24):
-            sx, sy = int(x * 4), int(y * 104 * 0.6 / 24)
-            out.px[y * 24 + x] = c.px[sy * c.w + sx] if sy < c.h and sx < c.w else ps.CLEAR
-    return out
+    return s2.boss_head(kind, lambda i: BOSS_FNS[kind](i))
 
 
 def proj_sprite(p):
-    pa = ps.pal(p.get("palette", "sun"))
+    pa = p.get("palette", "sun")
     sp = p.get("sprite")
     if sp == "ray":
-        return ps.projectile_ray(pa)
+        return s2.proj_ray(pa)
     if sp == "bolt":
-        return ps.projectile_bolt(pa)
+        return s2.proj_bolt(pa)
     if sp == "rock":
-        return ps.projectile_rock(pa)
-    return ps.projectile_orb(pa, *p.get("size", [18, 18]))
+        return s2.proj_rock(pa)
+    return s2.proj_orb(pa, *p.get("size", [18, 18]))
 
 
 def buff_sprite(b):
-    return ps.buff_icon(ps.pal(b.get("palette", "gold")), b.get("glyph", "heart"))
+    return s2.buff(b.get("palette", "gold"), b.get("glyph", "heart"))
 
 
 def gen(m):
@@ -388,6 +377,28 @@ def preview(m):
     board(bcells, 2, (70, 90, 140, 255), pv / "bosses.png", wrap=1100)
     if m.buffs:
         board([buff_sprite(b) for b in m.buffs], 4, (40, 36, 48, 255), pv / "buffs.png", wrap=1100)
+    # the three checks of the Art run: silhouette only, actual size (1x), and a labelled grading sheet (G1, G2, ...) the owner can grade by number
+    first = []
+    for n in m.enemies() + m.bosses():
+        sh = npc_sheet(n)
+        nf = 4 if n["sprite"] in ("scarab", "bird") or n.get("boss") else 3
+        fh = sh.h // nf
+        f = ps.Canvas(sh.w, fh)
+        for y in range(fh):
+            for x in range(sh.w):
+                f.px[y * sh.w + x] = sh.px[y * sh.w + x]
+        first.append((n["id"], f))
+    everything = [(i["id"], item_sprite(i)) for i in m.items if i["kind"] != "tile"] + [(t["id"], tile_canvas(t)) for t in m.tiles] + [(p["id"], proj_sprite(p)) for p in m.projs] + [(b["id"], buff_sprite(b)) for b in m.buffs] + first
+    board([art.silhouette(c) for _, c in everything], 3, (200, 200, 210, 255), pv / "silhouettes.png", wrap=1100)
+    board([c for _, c in everything], 1, (70, 90, 140, 255), pv / "actual-size.png", wrap=640)
+    labelled = []
+    for gi, (_, c) in enumerate(everything, 1):
+        cell = ps.Canvas(max(c.w, 30), c.h + 14)
+        cell.paste(c, (cell.w - c.w) // 2, 12)
+        art.label(cell, f"G{gi}", 1, 1, (255, 255, 255, 255), 1)
+        labelled.append(cell)
+    board(labelled, 3, (40, 36, 48, 255), pv / "grade-sheet.png", wrap=1200)
+    (pv / "grade-sheet.txt").write_text("\n".join(f"G{gi}\t{name}" for gi, (name, _) in enumerate(everything, 1)) + "\n", encoding="utf-8")
     for st in m.structs:
         bp = structs.build(st)
         pyramid.render(bp, pv / (re.sub(r"(?<!^)(?=[A-Z])", "-", st["id"]).lower() + ".png"), 6 if bp["width"] > 70 else 8)
