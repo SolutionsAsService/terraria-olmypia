@@ -1,0 +1,343 @@
+[
+ {
+  "id": "Hoplite",
+  "name": "Hoplite",
+  "ai": "fighter",
+  "sprite": "hoplite",
+  "size": [
+   36,
+   52
+  ],
+  "life": 80,
+  "damage": 24,
+  "defense": 8,
+  "kb": 0.4,
+  "value": 150,
+  "spawn": {
+   "zone": "surface",
+   "chance": 0.03,
+   "areas": {
+    "TempleOfOlympus": 0.6
+   }
+  },
+  "drops": [
+   {
+    "item": "mod:BronzeBar",
+    "denom": 3,
+    "min": 1,
+    "max": 3
+   }
+  ]
+ },
+ {
+  "id": "Satyr",
+  "name": "Satyr",
+  "ai": "fighter",
+  "sprite": "satyr",
+  "size": [
+   36,
+   52
+  ],
+  "life": 60,
+  "damage": 20,
+  "defense": 4,
+  "kb": 0.5,
+  "value": 100,
+  "spawn": {
+   "zone": "forest",
+   "chance": 0.05,
+   "areas": {
+    "TempleOfOlympus": 0.4
+   }
+  },
+  "drops": [
+   {
+    "item": "mod:AmbrosiaFlower",
+    "denom": 6
+   }
+  ]
+ },
+ {
+  "id": "Cyclops",
+  "name": "Cyclops",
+  "ai": "fighter",
+  "sprite": "cyclops",
+  "size": [
+   40,
+   56
+  ],
+  "life": 300,
+  "damage": 44,
+  "defense": 14,
+  "kb": 0.15,
+  "value": 700,
+  "spawn": {
+   "zone": "underground",
+   "chance": 0.015,
+   "areas": {
+    "LabyrinthOfTheMinotaur": 0.5
+   }
+  },
+  "drops": [
+   {
+    "item": "mod:BronzeBar",
+    "denom": 1,
+    "min": 2,
+    "max": 5
+   },
+   {
+    "item": "vanilla:GoldCoin",
+    "denom": 3,
+    "min": 1,
+    "max": 2
+   }
+  ]
+ },
+ {
+  "id": "StymphalianBird",
+  "name": "Stymphalian Bird",
+  "ai": "bat",
+  "sprite": "bird",
+  "size": [
+   34,
+   28
+  ],
+  "life": 30,
+  "damage": 22,
+  "defense": 3,
+  "kb": 0.8,
+  "value": 60,
+  "spawn": {
+   "zone": "surface",
+   "chance": 0.015,
+   "areas": {
+    "TempleOfOlympus": 0.5,
+    "LabyrinthOfTheMinotaur": 0.4
+   }
+  },
+  "drops": [
+   {
+    "item": "vanilla:Feather",
+    "denom": 3,
+    "min": 1,
+    "max": 2
+   }
+  ]
+ },
+ {
+  "id": "GorgonSnake",
+  "name": "Gorgon Snake",
+  "ai": "fighter",
+  "sprite": "snake",
+  "size": [
+   34,
+   48
+  ],
+  "life": 90,
+  "damage": 26,
+  "defense": 6,
+  "kb": 0.5,
+  "value": 160,
+  "spawn": {
+   "areas": {
+    "LabyrinthOfTheMinotaur": 0.7
+   }
+  },
+  "drops": [
+   {
+    "item": "mod:GorgonScale",
+    "denom": 4,
+    "min": 1,
+    "max": 2
+   }
+  ]
+ },
+ {
+  "id": "Minotaur",
+  "name": "The Minotaur",
+  "boss": true,
+  "movement": "ground",
+  "sprite": "boss:minotaur",
+  "size": [
+   90,
+   110
+  ],
+  "life": 3600,
+  "damage": 36,
+  "defense": 10,
+  "music": "Boss1",
+  "gold": 5,
+  "walk": {
+   "speed": 3.6,
+   "jump": 9
+  },
+  "attacks": {
+   "charge": {
+    "speed": 13,
+    "passes": 3
+   },
+   "slam": {
+    "projectile": "StompDebris",
+    "count": 7,
+    "speed": 9,
+    "damage": 24
+   },
+   "summon": {
+    "npc": "mod:GorgonSnake",
+    "count": 2
+   }
+  },
+  "bag": "MinotaurBag",
+  "flag": "downedMinotaur",
+  "drops": [
+   {
+    "item": "mod:AegisShield",
+    "denom": 1
+   },
+   {
+    "item": "mod:Labrys",
+    "denom": 2
+   },
+   {
+    "item": "mod:BronzeXiphos",
+    "denom": 3
+   },
+   {
+    "item": "mod:BronzeBar",
+    "min": 12,
+    "max": 20
+   }
+  ]
+ },
+ {
+  "id": "Medusa",
+  "name": "Medusa",
+  "boss": true,
+  "sprite": "boss:medusa",
+  "size": [
+   100,
+   120
+  ],
+  "life": 12000,
+  "damage": 72,
+  "defense": 22,
+  "music": "Boss4",
+  "gold": 15,
+  "hover": {
+   "height": 260,
+   "speed": 11
+  },
+  "attacks": {
+   "dash": {
+    "speed": 17,
+    "passes": 3
+   },
+   "volley": {
+    "projectile": "SnakeSpit",
+    "count": 7,
+    "spread": 0.16,
+    "speed": 10,
+    "damage": 46,
+    "interval": 16
+   },
+   "summon": {
+    "npc": "mod:GorgonSnake",
+    "count": 3
+   }
+  },
+  "bag": "MedusaBag",
+  "flag": "downedMedusa",
+  "drops": [
+   {
+    "item": "mod:GorgonsEye",
+    "denom": 1
+   },
+   {
+    "item": "mod:BowOfArtemis",
+    "denom": 3
+   },
+   {
+    "item": "mod:GorgonScale",
+    "min": 12,
+    "max": 20
+   },
+   {
+    "item": "vanilla:HallowedBar",
+    "min": 8,
+    "max": 14
+   }
+  ]
+ },
+ {
+  "id": "Zeus",
+  "name": "Zeus, King of the Gods",
+  "boss": true,
+  "sprite": "boss:zeus",
+  "size": [
+   130,
+   150
+  ],
+  "life": 46000,
+  "damage": 120,
+  "defense": 34,
+  "music": "LunarBoss",
+  "gold": 30,
+  "hover": {
+   "height": 300,
+   "speed": 13
+  },
+  "attacks": {
+   "dash": {
+    "speed": 22,
+    "passes": 4
+   },
+   "volley": {
+    "projectile": "ZeusLightning",
+    "count": 8,
+    "spread": 0.13,
+    "speed": 15,
+    "damage": 88,
+    "interval": 14
+   },
+   "rain": {
+    "projectile": "ZeusLightning",
+    "count": 6,
+    "spacing": 90,
+    "speed": 14,
+    "damage": 92,
+    "interval": 28,
+    "waves": 3
+   },
+   "summon": {
+    "npc": "mod:StymphalianBird",
+    "count": 4
+   }
+  },
+  "bag": "ZeusBag",
+  "flag": "downedZeus",
+  "drops": [
+   {
+    "item": "mod:CloakOfOlympus",
+    "denom": 1
+   },
+   {
+    "item": "mod:ThunderboltOfZeus",
+    "denom": 3
+   },
+   {
+    "item": "mod:TridentOfPoseidon",
+    "denom": 3
+   },
+   {
+    "item": "mod:LightningFragment",
+    "min": 20,
+    "max": 30
+   },
+   {
+    "item": "mod:GorgonScale",
+    "min": 10,
+    "max": 16
+   }
+  ]
+ }
+]

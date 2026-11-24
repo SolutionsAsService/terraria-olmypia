@@ -1,0 +1,101 @@
+[
+ {
+  "id": "ZeusLightning",
+  "name": "Lightning",
+  "hostile": true,
+  "sprite": "bolt",
+  "palette": "storm",
+  "size": [
+   14,
+   40
+  ],
+  "dust": "IceTorch",
+  "light": [
+   0.6,
+   0.8,
+   1.0
+  ],
+  "time": 200
+ },
+ {
+  "id": "SnakeSpit",
+  "name": "Venom Spit",
+  "hostile": true,
+  "sprite": "orb",
+  "palette": "green",
+  "size": [
+   16,
+   16
+  ],
+  "dust": "Stone",
+  "light": [
+   0.3,
+   1.0,
+   0.3
+  ],
+  "time": 240,
+  "on_hit_buff": {
+   "buff": "Poisoned",
+   "seconds": 5
+  }
+ },
+ {
+  "id": "StompDebris",
+  "name": "Debris",
+  "hostile": true,
+  "sprite": "rock",
+  "palette": "stone",
+  "size": [
+   18,
+   18
+  ],
+  "dust": "Stone",
+  "light": [
+   0.2,
+   0.2,
+   0.2
+  ],
+  "gravity": 0.35,
+  "spin": true,
+  "tile_collide": true,
+  "time": 150
+ },
+ {
+  "id": "ThunderBolt",
+  "name": "Thunderbolt",
+  "hostile": false,
+  "sprite": "bolt",
+  "palette": "storm",
+  "size": [
+   14,
+   40
+  ],
+  "dust": "IceTorch",
+  "light": [
+   0.6,
+   0.8,
+   1.0
+  ],
+  "penetrate": 4,
+  "time": 130
+ },
+ {
+  "id": "PoseidonWave",
+  "name": "Wave",
+  "hostile": false,
+  "sprite": "orb",
+  "palette": "sea",
+  "size": [
+   18,
+   18
+  ],
+  "dust": "Stone",
+  "light": [
+   0.2,
+   0.5,
+   1.0
+  ],
+  "penetrate": 3,
+  "time": 120
+ }
+]

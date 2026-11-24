@@ -1,0 +1,520 @@
+[
+ {
+  "id": "BronzeBar",
+  "name": "Bronze Bar",
+  "tooltip": "A bar of hammered bronze.",
+  "kind": "material",
+  "sprite": "bar",
+  "palette": "bronze",
+  "size": [
+   30,
+   20
+  ],
+  "rarity": "Blue",
+  "value": 3000
+ },
+ {
+  "id": "GorgonScale",
+  "name": "Gorgon Scale",
+  "tooltip": "A scale that was once stone.",
+  "kind": "material",
+  "sprite": "scale",
+  "palette": "green",
+  "size": [
+   24,
+   26
+  ],
+  "rarity": "Lime",
+  "value": 9000
+ },
+ {
+  "id": "LightningFragment",
+  "name": "Lightning Fragment",
+  "tooltip": "A bolt that stayed.",
+  "kind": "material",
+  "sprite": "shard",
+  "palette": "storm",
+  "size": [
+   22,
+   26
+  ],
+  "rarity": "Red",
+  "value": 20000
+ },
+ {
+  "id": "AmbrosiaFlower",
+  "name": "Ambrosia Flower",
+  "tooltip": "It grows only where the gods have walked.",
+  "kind": "material",
+  "sprite": "flower",
+  "palette": "ambrosia",
+  "size": [
+   26,
+   30
+  ],
+  "rarity": "Green",
+  "value": 2000
+ },
+ {
+  "id": "BronzeXiphos",
+  "name": "Bronze Xiphos",
+  "tooltip": "A leaf-bladed short sword.",
+  "kind": "sword",
+  "sprite": "xiphos",
+  "palette": "bronze",
+  "damage": 24,
+  "use_time": 18,
+  "knockback": 4.5,
+  "size": [
+   44,
+   44
+  ],
+  "rarity": "Green",
+  "value": 15000,
+  "recipe": {
+   "ingredients": [
+    [
+     "mod:BronzeBar",
+     8
+    ]
+   ],
+   "station": "vanilla:Anvils"
+  }
+ },
+ {
+  "id": "Labrys",
+  "name": "Labrys",
+  "tooltip": "The double axe of the labyrinth. Strikes hard and slowly.",
+  "kind": "sword",
+  "sprite": "labrys",
+  "palette": "bronze",
+  "accent": "wood",
+  "damage": 42,
+  "use_time": 30,
+  "knockback": 9,
+  "size": [
+   44,
+   44
+  ],
+  "rarity": "Orange",
+  "value": 40000
+ },
+ {
+  "id": "BowOfArtemis",
+  "name": "Bow of Artemis",
+  "tooltip": "Never lets a shot go astray.\nUses arrows.",
+  "kind": "bow",
+  "sprite": "bow",
+  "palette": "wood",
+  "damage": 58,
+  "use_time": 16,
+  "knockback": 3.5,
+  "shoot_speed": 16,
+  "size": [
+   36,
+   44
+  ],
+  "rarity": "Lime",
+  "value": 150000
+ },
+ {
+  "id": "TridentOfPoseidon",
+  "name": "Trident of Poseidon",
+  "tooltip": "Throws a piercing wave.",
+  "kind": "staff",
+  "sprite": "trident",
+  "palette": "sea",
+  "damage": 92,
+  "mana": 14,
+  "use_time": 22,
+  "knockback": 5,
+  "shoot": "PoseidonWave",
+  "shoot_speed": 13,
+  "size": [
+   40,
+   44
+  ],
+  "rarity": "Lime",
+  "value": 180000
+ },
+ {
+  "id": "ThunderboltOfZeus",
+  "name": "Thunderbolt of Zeus",
+  "tooltip": "Hurls a bolt of the king's own lightning.",
+  "kind": "staff",
+  "sprite": "thunderbolt",
+  "palette": "storm",
+  "damage": 176,
+  "mana": 20,
+  "use_time": 18,
+  "knockback": 6,
+  "shoot": "ThunderBolt",
+  "shoot_speed": 18,
+  "size": [
+   36,
+   44
+  ],
+  "rarity": "Red",
+  "value": 500000
+ },
+ {
+  "id": "AegisShield",
+  "name": "Aegis",
+  "tooltip": "Increases defense by 6\nImmunity to knockback",
+  "kind": "accessory",
+  "sprite": "shield",
+  "palette": "bronze",
+  "accent": "blood",
+  "size": [
+   36,
+   36
+  ],
+  "rarity": "Orange",
+  "value": 50000,
+  "defense": 6,
+  "effects": {
+   "no_knockback": true
+  }
+ },
+ {
+  "id": "WingedSandals",
+  "name": "Winged Sandals",
+  "tooltip": "Increases movement speed and jump height",
+  "kind": "accessory",
+  "sprite": "sandals",
+  "palette": "wood",
+  "accent": "marble",
+  "size": [
+   36,
+   30
+  ],
+  "rarity": "Orange",
+  "value": 60000,
+  "effects": {
+   "speed": 0.15,
+   "run_speed": 6.5,
+   "jump": 1.2
+  }
+ },
+ {
+  "id": "LaurelWreath",
+  "name": "Laurel Wreath",
+  "tooltip": "Increases damage by 6%\nIncreases critical strike chance by 7%",
+  "kind": "accessory",
+  "sprite": "laurel",
+  "palette": "olive",
+  "size": [
+   34,
+   30
+  ],
+  "rarity": "Green",
+  "value": 30000,
+  "effects": {
+   "damage": 0.06,
+   "crit": 7
+  }
+ },
+ {
+  "id": "GorgonsEye",
+  "name": "Gorgon's Eye",
+  "tooltip": "Increases damage by 10%\nIncreases critical strike chance by 8%",
+  "kind": "accessory",
+  "sprite": "mirror",
+  "palette": "bronze",
+  "accent": "green",
+  "size": [
+   30,
+   38
+  ],
+  "rarity": "Lime",
+  "value": 150000,
+  "effects": {
+   "damage": 0.1,
+   "crit": 8
+  }
+ },
+ {
+  "id": "CloakOfOlympus",
+  "name": "Cloak of Olympus",
+  "tooltip": "Increases damage by 14%\nIncreases maximum life by 80\nIncreases life regeneration",
+  "kind": "accessory",
+  "sprite": "laurel",
+  "palette": "storm",
+  "size": [
+   34,
+   30
+  ],
+  "rarity": "Red",
+  "value": 400000,
+  "effects": {
+   "damage": 0.14,
+   "life": 80,
+   "regen": 3
+  }
+ },
+ {
+  "id": "Ambrosia",
+  "name": "Ambrosia",
+  "tooltip": "Food of the gods.",
+  "kind": "potion",
+  "sprite": "potion",
+  "palette": "ambrosia",
+  "buff": "AmbrosiaBuff",
+  "seconds": 300,
+  "size": [
+   22,
+   30
+  ],
+  "rarity": "Green",
+  "value": 4000,
+  "recipe": {
+   "ingredients": [
+    [
+     "mod:AmbrosiaFlower",
+     2
+    ],
+    [
+     "vanilla:BottledWater",
+     1
+    ]
+   ],
+   "station": "vanilla:Bottles"
+  }
+ },
+ {
+  "id": "NectarOfTheGods",
+  "name": "Nectar of the Gods",
+  "tooltip": "A draught that makes mortals bold.",
+  "kind": "potion",
+  "sprite": "potion",
+  "palette": "sun",
+  "buff": "OlympianBlessing",
+  "seconds": 480,
+  "size": [
+   22,
+   30
+  ],
+  "rarity": "Lime",
+  "value": 9000,
+  "recipe": {
+   "ingredients": [
+    [
+     "mod:AmbrosiaFlower",
+     1
+    ],
+    [
+     "vanilla:Daybloom",
+     1
+    ],
+    [
+     "vanilla:BottledWater",
+     1
+    ]
+   ],
+   "station": "vanilla:Bottles"
+  }
+ },
+ {
+  "id": "WineOfDionysus",
+  "name": "Wine of Dionysus",
+  "tooltip": "Dark, sweet and dangerous.",
+  "kind": "potion",
+  "sprite": "potion",
+  "palette": "wine",
+  "buff": "Revelry",
+  "seconds": 300,
+  "size": [
+   22,
+   30
+  ],
+  "rarity": "Green",
+  "value": 5000,
+  "recipe": {
+   "ingredients": [
+    [
+     "mod:AmbrosiaFlower",
+     1
+    ],
+    [
+     "vanilla:Fireblossom",
+     1
+    ],
+    [
+     "vanilla:BottledWater",
+     1
+    ]
+   ],
+   "station": "vanilla:Bottles"
+  }
+ },
+ {
+  "id": "HornOfTheLabyrinth",
+  "name": "Horn of the Labyrinth",
+  "tooltip": "Calls the bull that lives in the maze.\nSummons the Minotaur.",
+  "kind": "summon",
+  "boss": "Minotaur",
+  "sprite": "horn",
+  "palette": "bone",
+  "size": [
+   36,
+   34
+  ],
+  "rarity": "Orange",
+  "value": 10000,
+  "recipe": {
+   "ingredients": [
+    [
+     "mod:BronzeBar",
+     6
+    ],
+    [
+     "vanilla:Bone",
+     10
+    ]
+   ],
+   "station": "vanilla:Anvils"
+  }
+ },
+ {
+  "id": "MirrorOfPerseus",
+  "name": "Mirror of Perseus",
+  "tooltip": "Do not look directly.\nSummons Medusa.",
+  "kind": "summon",
+  "boss": "Medusa",
+  "sprite": "mirror",
+  "palette": "bronze",
+  "accent": "green",
+  "size": [
+   30,
+   38
+  ],
+  "rarity": "Lime",
+  "value": 50000,
+  "recipe": {
+   "ingredients": [
+    [
+     "mod:GorgonScale",
+     8
+    ],
+    [
+     "vanilla:HallowedBar",
+     6
+    ]
+   ],
+   "station": "vanilla:MythrilAnvil"
+  }
+ },
+ {
+  "id": "OfferingToZeus",
+  "name": "Offering to Zeus",
+  "tooltip": "Burnt on a high place, it is answered.\nSummons Zeus.",
+  "kind": "summon",
+  "boss": "Zeus",
+  "sprite": "cartouche",
+  "palette": "storm",
+  "accent": "gold",
+  "size": [
+   30,
+   36
+  ],
+  "rarity": "Red",
+  "value": 100000,
+  "recipe": {
+   "ingredients": [
+    [
+     "mod:LightningFragment",
+     10
+    ],
+    [
+     "vanilla:HallowedBar",
+     10
+    ],
+    [
+     "mod:GorgonScale",
+     5
+    ]
+   ],
+   "station": "vanilla:MythrilAnvil"
+  }
+ },
+ {
+  "id": "MinotaurBag",
+  "name": "Treasure Bag (The Minotaur)",
+  "tooltip": "{$CommonItemTooltip.RightClickToOpen}",
+  "kind": "bag",
+  "boss": "Minotaur",
+  "sprite": "bag",
+  "palette": "wood",
+  "accent": "bronze",
+  "prehardmode": true,
+  "drops": [
+   {
+    "item": "mod:AegisShield",
+    "denom": 1
+   },
+   {
+    "item": "mod:Labrys",
+    "denom": 2
+   },
+   {
+    "item": "mod:BronzeBar",
+    "min": 12,
+    "max": 20
+   }
+  ]
+ },
+ {
+  "id": "MedusaBag",
+  "name": "Treasure Bag (Medusa)",
+  "tooltip": "{$CommonItemTooltip.RightClickToOpen}",
+  "kind": "bag",
+  "boss": "Medusa",
+  "sprite": "bag",
+  "palette": "olive",
+  "accent": "gold",
+  "drops": [
+   {
+    "item": "mod:GorgonsEye",
+    "denom": 1
+   },
+   {
+    "item": "mod:BowOfArtemis",
+    "denom": 3
+   },
+   {
+    "item": "mod:GorgonScale",
+    "min": 12,
+    "max": 20
+   }
+  ]
+ },
+ {
+  "id": "ZeusBag",
+  "name": "Treasure Bag (Zeus)",
+  "tooltip": "{$CommonItemTooltip.RightClickToOpen}",
+  "kind": "bag",
+  "boss": "Zeus",
+  "sprite": "bag",
+  "palette": "storm",
+  "accent": "gold",
+  "drops": [
+   {
+    "item": "mod:CloakOfOlympus",
+    "denom": 1
+   },
+   {
+    "item": "mod:ThunderboltOfZeus",
+    "denom": 3
+   },
+   {
+    "item": "mod:TridentOfPoseidon",
+    "denom": 3
+   },
+   {
+    "item": "mod:LightningFragment",
+    "min": 20,
+    "max": 30
+   }
+  ]
+ }
+]

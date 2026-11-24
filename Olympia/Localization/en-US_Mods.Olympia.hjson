@@ -1,0 +1,196 @@
+Mods: {
+	Olympia: {
+		Items: {
+			BronzeBar: {
+				DisplayName: '''Bronze Bar'''
+				Tooltip: '''A bar of hammered bronze.'''
+			}
+			GorgonScale: {
+				DisplayName: '''Gorgon Scale'''
+				Tooltip: '''A scale that was once stone.'''
+			}
+			LightningFragment: {
+				DisplayName: '''Lightning Fragment'''
+				Tooltip: '''A bolt that stayed.'''
+			}
+			AmbrosiaFlower: {
+				DisplayName: '''Ambrosia Flower'''
+				Tooltip: '''It grows only where the gods have walked.'''
+			}
+			BronzeXiphos: {
+				DisplayName: '''Bronze Xiphos'''
+				Tooltip: '''A leaf-bladed short sword.'''
+			}
+			Labrys: {
+				DisplayName: '''Labrys'''
+				Tooltip: '''The double axe of the labyrinth. Strikes hard and slowly.'''
+			}
+			BowOfArtemis: {
+				DisplayName: '''Bow of Artemis'''
+				Tooltip: '''Never lets a shot go astray.
+Uses arrows.'''
+			}
+			TridentOfPoseidon: {
+				DisplayName: '''Trident of Poseidon'''
+				Tooltip: '''Throws a piercing wave.'''
+			}
+			ThunderboltOfZeus: {
+				DisplayName: '''Thunderbolt of Zeus'''
+				Tooltip: '''Hurls a bolt of the king's own lightning.'''
+			}
+			AegisShield: {
+				DisplayName: '''Aegis'''
+				Tooltip: '''Increases defense by 6
+Immunity to knockback'''
+			}
+			WingedSandals: {
+				DisplayName: '''Winged Sandals'''
+				Tooltip: '''Increases movement speed and jump height'''
+			}
+			LaurelWreath: {
+				DisplayName: '''Laurel Wreath'''
+				Tooltip: '''Increases damage by 6%
+Increases critical strike chance by 7%'''
+			}
+			GorgonsEye: {
+				DisplayName: '''Gorgon's Eye'''
+				Tooltip: '''Increases damage by 10%
+Increases critical strike chance by 8%'''
+			}
+			CloakOfOlympus: {
+				DisplayName: '''Cloak of Olympus'''
+				Tooltip: '''Increases damage by 14%
+Increases maximum life by 80
+Increases life regeneration'''
+			}
+			Ambrosia: {
+				DisplayName: '''Ambrosia'''
+				Tooltip: '''Food of the gods.'''
+			}
+			NectarOfTheGods: {
+				DisplayName: '''Nectar of the Gods'''
+				Tooltip: '''A draught that makes mortals bold.'''
+			}
+			WineOfDionysus: {
+				DisplayName: '''Wine of Dionysus'''
+				Tooltip: '''Dark, sweet and dangerous.'''
+			}
+			HornOfTheLabyrinth: {
+				DisplayName: '''Horn of the Labyrinth'''
+				Tooltip: '''Calls the bull that lives in the maze.
+Summons the Minotaur.'''
+			}
+			MirrorOfPerseus: {
+				DisplayName: '''Mirror of Perseus'''
+				Tooltip: '''Do not look directly.
+Summons Medusa.'''
+			}
+			OfferingToZeus: {
+				DisplayName: '''Offering to Zeus'''
+				Tooltip: '''Burnt on a high place, it is answered.
+Summons Zeus.'''
+			}
+			MinotaurBag: {
+				DisplayName: '''Treasure Bag (The Minotaur)'''
+				Tooltip: '''{$CommonItemTooltip.RightClickToOpen}'''
+			}
+			MedusaBag: {
+				DisplayName: '''Treasure Bag (Medusa)'''
+				Tooltip: '''{$CommonItemTooltip.RightClickToOpen}'''
+			}
+			ZeusBag: {
+				DisplayName: '''Treasure Bag (Zeus)'''
+				Tooltip: '''{$CommonItemTooltip.RightClickToOpen}'''
+			}
+			OlympianMarble: {
+				DisplayName: '''Olympian Marble'''
+				Tooltip: '''White marble veined with grey.'''
+			}
+			BlackMarble: {
+				DisplayName: '''Black Marble'''
+				Tooltip: '''The stone of the underworld and the maze.'''
+			}
+			MeanderBrick: {
+				DisplayName: '''Meander Brick'''
+				Tooltip: '''Marble cut with the Greek key.'''
+			}
+			BronzePlate: {
+				DisplayName: '''Bronze Plate'''
+				Tooltip: '''Riveted bronze, for altars and doors.'''
+			}
+			OlympianMarble: {
+				DisplayName: '''Olympian Marble'''
+				Tooltip: ''''''
+			}
+			BlackMarble: {
+				DisplayName: '''Black Marble'''
+				Tooltip: ''''''
+			}
+			MeanderBrick: {
+				DisplayName: '''Meander Brick'''
+				Tooltip: ''''''
+			}
+			BronzePlate: {
+				DisplayName: '''Bronze Plate'''
+				Tooltip: ''''''
+			}
+		}
+		NPCs: {
+			Hoplite: {
+				DisplayName: '''Hoplite'''
+			}
+			Satyr: {
+				DisplayName: '''Satyr'''
+			}
+			Cyclops: {
+				DisplayName: '''Cyclops'''
+			}
+			StymphalianBird: {
+				DisplayName: '''Stymphalian Bird'''
+			}
+			GorgonSnake: {
+				DisplayName: '''Gorgon Snake'''
+			}
+			Minotaur: {
+				DisplayName: '''The Minotaur'''
+			}
+			Medusa: {
+				DisplayName: '''Medusa'''
+			}
+			Zeus: {
+				DisplayName: '''Zeus, King of the Gods'''
+			}
+		}
+		Projectiles: {
+			ZeusLightning: {
+				DisplayName: '''Lightning'''
+			}
+			SnakeSpit: {
+				DisplayName: '''Venom Spit'''
+			}
+			StompDebris: {
+				DisplayName: '''Debris'''
+			}
+			ThunderBolt: {
+				DisplayName: '''Thunderbolt'''
+			}
+			PoseidonWave: {
+				DisplayName: '''Wave'''
+			}
+		}
+		Buffs: {
+			AmbrosiaBuff: {
+				DisplayName: '''Ambrosia'''
+				Description: '''Life regeneration is greatly increased'''
+			}
+			OlympianBlessing: {
+				DisplayName: '''Olympian Blessing'''
+				Description: '''Damage and critical strike chance increased'''
+			}
+			Revelry: {
+				DisplayName: '''Revelry'''
+				Description: '''Run faster and strike truer'''
+			}
+		}
+	}
+}

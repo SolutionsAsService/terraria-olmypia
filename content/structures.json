@@ -1,0 +1,129 @@
+[
+ {
+  "id": "TempleOfOlympus",
+  "kind": "greek_temple",
+  "site": "surface",
+  "title": "the Temple of Olympus",
+  "width": 65,
+  "tile_map": {
+   "B": "OlympianMarble",
+   "H": "MeanderBrick",
+   "G": "BronzePlate",
+   "L": "BlackMarble"
+  },
+  "wall": "GrayBrick",
+  "column_wall": "SandstoneBrick",
+  "chest_loot": {
+   "cella": [
+    {
+     "item": "vanilla:GoldCoin",
+     "min": 2,
+     "max": 6
+    },
+    {
+     "item": "mod:BronzeBar",
+     "min": 4,
+     "max": 9
+    },
+    {
+     "item": "mod:Ambrosia",
+     "min": 1,
+     "max": 2,
+     "chance": 0.5
+    },
+    {
+     "item": "mod:LaurelWreath",
+     "chance": 0.3
+    }
+   ],
+   "crypt": [
+    {
+     "item": "vanilla:GoldCoin",
+     "min": 5,
+     "max": 12
+    },
+    {
+     "item": "mod:BowOfArtemis",
+     "chance": 0.2
+    },
+    {
+     "item": "mod:WingedSandals",
+     "chance": 0.3
+    },
+    {
+     "item": "mod:HornOfTheLabyrinth",
+     "chance": 0.6
+    },
+    {
+     "item": "mod:AmbrosiaFlower",
+     "min": 2,
+     "max": 4
+    }
+   ]
+  }
+ },
+ {
+  "id": "LabyrinthOfTheMinotaur",
+  "kind": "labyrinth",
+  "site": "underground",
+  "title": "the Labyrinth of the Minotaur",
+  "shaft": true,
+  "cells": [
+   15,
+   7
+  ],
+  "seed": 11,
+  "tile_map": {
+   "L": "BlackMarble",
+   "H": "MeanderBrick",
+   "B": "OlympianMarble",
+   "G": "BronzePlate"
+  },
+  "wall": "GrayBrick",
+  "chest_loot": {
+   "great": [
+    {
+     "item": "vanilla:GoldCoin",
+     "min": 8,
+     "max": 20
+    },
+    {
+     "item": "mod:HornOfTheLabyrinth",
+     "min": 1,
+     "max": 1
+    },
+    {
+     "item": "mod:Labrys",
+     "chance": 0.4
+    },
+    {
+     "item": "mod:WingedSandals",
+     "chance": 0.5
+    }
+   ],
+   "dead_end": [
+    {
+     "item": "vanilla:GoldCoin",
+     "min": 1,
+     "max": 4
+    },
+    {
+     "item": "mod:BronzeBar",
+     "min": 3,
+     "max": 8
+    },
+    {
+     "item": "mod:AmbrosiaFlower",
+     "min": 1,
+     "max": 3,
+     "chance": 0.5
+    },
+    {
+     "item": "vanilla:HealingPotion",
+     "min": 1,
+     "max": 2
+    }
+   ]
+  }
+ }
+]

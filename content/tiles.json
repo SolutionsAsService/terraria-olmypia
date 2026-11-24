@@ -1,0 +1,87 @@
+[
+ {
+  "id": "OlympianMarble",
+  "name": "Olympian Marble",
+  "tooltip": "White marble veined with grey.",
+  "pattern": "marble",
+  "palette": "marble",
+  "map_color": "#e8e6ee",
+  "dust": "Stone",
+  "resist": 2,
+  "recipe": {
+   "ingredients": [
+    [
+     "vanilla:StoneBlock",
+     4
+    ]
+   ],
+   "station": "vanilla:WorkBenches",
+   "count": 4
+  }
+ },
+ {
+  "id": "BlackMarble",
+  "name": "Black Marble",
+  "tooltip": "The stone of the underworld and the maze.",
+  "pattern": "blackmarble",
+  "palette": "blackmarble",
+  "map_color": "#34323e",
+  "dust": "Stone",
+  "resist": 3,
+  "recipe": {
+   "ingredients": [
+    [
+     "mod:OlympianMarble",
+     4
+    ],
+    [
+     "vanilla:Obsidian",
+     1
+    ]
+   ],
+   "station": "vanilla:Anvils",
+   "count": 4
+  }
+ },
+ {
+  "id": "MeanderBrick",
+  "name": "Meander Brick",
+  "tooltip": "Marble cut with the Greek key.",
+  "pattern": "meander",
+  "palette": "marble",
+  "accent": "lapis",
+  "map_color": "#c8c6d6",
+  "dust": "Stone",
+  "resist": 2,
+  "recipe": {
+   "ingredients": [
+    [
+     "mod:OlympianMarble",
+     4
+    ]
+   ],
+   "station": "vanilla:WorkBenches",
+   "count": 4
+  }
+ },
+ {
+  "id": "BronzePlate",
+  "name": "Bronze Plate",
+  "tooltip": "Riveted bronze, for altars and doors.",
+  "pattern": "bronze",
+  "palette": "bronze",
+  "map_color": "#c88a40",
+  "dust": "Gold",
+  "resist": 3,
+  "recipe": {
+   "ingredients": [
+    [
+     "mod:BronzeBar",
+     1
+    ]
+   ],
+   "station": "vanilla:Anvils",
+   "count": 2
+  }
+ }
+]
