@@ -10,7 +10,8 @@
 
 ## Next (not built)
 
-* **The Hydra** (a worm boss), **Cerberus**, **Poseidon** and **Hades** (an underworld temple); **Pegasus** and **chariot** mounts.
+* Done in 0.2.0: **Cerberus** (ground boss) and **the Hydra** (hover boss; three weaving necks, not a worm).
+* Still to do: **Poseidon** and **Hades** (an underworld temple); **Pegasus** and **chariot** mounts; a Delphi oracle (Town NPC); armour (needs the equip-sheet layout verified).
 * Armour sets (the Hoplite, Spartan and Olympian sets) once the equip sheets can be drawn on the player template.
 * A **Town NPC** (an oracle who sells maps of the labyrinth), a **Delphi** biome with an oracle chamber, olive groves and amphorae, custom marble walls and furniture, music and trophies.
 * Multiplayer checks and balance from real play.

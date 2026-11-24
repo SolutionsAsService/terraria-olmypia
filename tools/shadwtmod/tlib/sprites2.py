@@ -946,6 +946,82 @@ def boss_zeus(frame, w=130, h=150):
     return finish(c)
 
 
+def _hound_head(c, x, y, sc, fur, tone_eye, frame, open_=0):
+    """One hound head in profile facing right: skull, long snout, jaw, ear, a burning eye."""
+    lit_ellipse(c, x, y, 9 * sc, 8 * sc, fur)
+    lit_poly(c, [(x + 4 * sc, y - 4 * sc), (x + 17 * sc, y - 1 * sc), (x + 17 * sc, y + 3 * sc), (x + 4 * sc, y + 4 * sc)], fur)
+    lit_poly(c, [(x + 4 * sc, y + 3 * sc + open_), (x + 15 * sc, y + 4 * sc + open_), (x + 13 * sc, y + 8 * sc + open_), (x + 3 * sc, y + 7 * sc + open_)], ramp("#3a2a2a"))     # the lower jaw
+    for k in range(3):
+        c.line(x + (7 + k * 3) * sc, y + 3 * sc, x + (7 + k * 3) * sc, y + 5 * sc + open_, W)                      # fangs
+    lit_poly(c, [(x - 6 * sc, y - 5 * sc), (x - 2 * sc, y - 15 * sc), (x + 2 * sc, y - 6 * sc)], fur)              # a pricked ear
+    lit_ellipse(c, x + 3 * sc, y - 2 * sc, 1.9 * sc, 1.5 * sc, tone_eye)
+    c.set(int(x + 3 * sc), int(y - 2 * sc), W)
+    c.set(int(x + 17 * sc), int(y - 1 * sc), hexc("#101010"))
+
+
+def boss_cerberus(frame, w=110, h=80):
+    """Cerberus: low and long, four legs, three snarling heads on a thick shoulder, a mane of flame and a serpent for a tail."""
+    c = Canvas(w, h)
+    fur = ramp("#4a3844")
+    fl = R("flame")
+    eye = ramp("#ff6020")
+    sw = [0, 5, 0, -5][frame % 4]
+    b = [0, -1, 0, 1][frame % 4]
+    for x0, sx in ((24, -1), (30, 1), (62, -1), (68, 1)):                                                      # four legs, front pair swinging against the back pair
+        k = sw * (1 if sx > 0 else -1)
+        lit_line(c, (x0, 50 + b), (x0 + k * 0.6, 66), 6, 4.4, fur if sx > 0 else ramp("#33262e"))
+        lit_line(c, (x0 + k * 0.6, 66), (x0 + k, h - 5), 4.4, 3.6, fur if sx > 0 else ramp("#33262e"))
+        lit_poly(c, [(x0 + k - 5, h - 7), (x0 + k + 6, h - 7), (x0 + k + 7, h - 1), (x0 + k - 5, h - 1)], ramp("#201418"))
+    for k in range(5):                                                                                          # the tail: a snake, curling up behind
+        t = k / 4
+        lit_ellipse(c, 12 - 9 * math.sin(t * 2.4) + frame % 2, 42 - t * 24, 4.2 - t * 1.4, 4.2 - t * 1.4, R("green"))
+    lit_ellipse(c, 12 - 9 * math.sin(2.4) + frame % 2, 16, 3.6, 3, R("green"))
+    lit_ellipse(c, 46, 42 + b, 34, 17, fur)                                                                     # the long body
+    lit_ellipse(c, 74, 38 + b, 15, 17, fur)                                                                     # the heavy shoulder
+    for k in range(7):                                                                                          # a mane and spine of flame
+        fx = 36 + k * 7
+        lit_poly(c, [(fx - 4, 30 + b), (fx + (k % 2) * 3, 14 + b - (frame % 2) * 3 - (k % 3) * 3), (fx + 4, 30 + b)], fl, flat=True)
+    for hx, hy, sc, op in ((82, 8 + b, 1.1, 1), (96, 30 + b, 1.0, 2), (86, 54 + b, 0.9, 0)):                  # three heads at different heights
+        lit_line(c, (76, 38 + b), (hx, hy), 6.5 * sc, 5 * sc, fur)
+        _hound_head(c, hx, hy, sc, fur, eye, frame, op * (frame % 2))
+    return finish(c)
+
+
+def boss_hydra(frame, w=120, h=130):
+    """Hydra: a coiled body at the bottom and three long necks rising and weaving to three open-jawed heads."""
+    c = Canvas(w, h)
+    g, ol = R("green"), R("olive")
+    cx = w // 2
+    for k, (rx, ry, y) in enumerate(((46, 15, h - 14), (38, 13, h - 28), (28, 11, h - 40))):                   # the coiled body, three stacked rings
+        lit_ellipse(c, cx, y, rx, ry, g if k % 2 == 0 else ol)
+        lit_poly(c, [(cx - rx * 0.6, y + ry * 0.3), (cx + rx * 0.6, y + ry * 0.3), (cx + rx * 0.5, y + ry * 0.7), (cx - rx * 0.5, y + ry * 0.7)], R("sand"), flat=True)    # a pale belly band
+    heads = []
+    for k, bx in enumerate((cx - 20, cx, cx + 20)):                                                             # three necks, each weaving on its own phase
+        pts = []
+        for j in range(9):
+            t = j / 8
+            x = bx + (k - 1) * 22 * t + 9 * math.sin(t * 4 + k * 2.1 + frame * 0.9) * t
+            y = h - 52 - t * (h - 78 + (12 if k == 1 else 0) - (k % 2) * 8)
+            pts.append((x, y))
+        for j in range(8):
+            r = 8 - 3.2 * (j / 8)
+            lit_line(c, pts[j], pts[j + 1], r, r - 0.4, g if k != 1 else ol)
+        heads.append(pts[-1])
+    for k, (hx, hy) in enumerate(heads):
+        face = -1 if k == 0 else 1
+        lit_ellipse(c, hx, hy, 8.5, 7, ol if k == 1 else g)
+        lit_poly(c, [(hx + face * 3, hy - 3), (hx + face * 17, hy), (hx + face * 17, hy + 3), (hx + face * 3, hy + 4)], ol if k == 1 else g)
+        op = 3 + (frame % 2) * 2
+        lit_poly(c, [(hx + face * 3, hy + 3 + op), (hx + face * 15, hy + 3 + op), (hx + face * 13, hy + 7 + op), (hx + face * 2, hy + 6 + op)], ramp("#601820"))
+        c.line(hx + face * 15, hy + 3, hx + face * 15, hy + 6 + op, W); c.line(hx + face * 11, hy + 3, hx + face * 11, hy + 5 + op, W)
+        lit_ellipse(c, hx + face * 2, hy - 2, 2, 1.6, ramp("#ffe040")); c.set(int(hx + face * 2), int(hy - 2), hexc("#101010"))
+        for j in range(3):                                                                                      # a crest of frills behind each head
+            lit_poly(c, [(hx - face * 6, hy - 3 + j * 3), (hx - face * 13, hy - 6 + j * 4), (hx - face * 6, hy + j * 3 + 1)], R("blood"), flat=True)
+        if frame % 2 == 0:
+            c.line(hx + face * 14, hy + 9, hx + face * 14, hy + 13, hexc("#80ff60"))                          # a drop of venom
+    return finish(c)
+
+
 def boss_head(kind, boss_fn):
     """A 24 by 24 head icon: the head of the boss, found from the top of its own drawing."""
     big = boss_fn(0)

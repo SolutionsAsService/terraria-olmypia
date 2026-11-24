@@ -12,6 +12,8 @@ namespace Olympia.Systems
         public static bool downedMinotaur;
         public static bool downedMedusa;
         public static bool downedZeus;
+        public static bool downedCerberus;
+        public static bool downedHydra;
         public static Rectangle TempleOfOlympusArea;
         public static Rectangle LabyrinthOfTheMinotaurArea;
 
@@ -25,6 +27,8 @@ namespace Olympia.Systems
             downedMinotaur = false;
             downedMedusa = false;
             downedZeus = false;
+            downedCerberus = false;
+            downedHydra = false;
             TempleOfOlympusArea = Rectangle.Empty;
             LabyrinthOfTheMinotaurArea = Rectangle.Empty;
         }
@@ -34,6 +38,8 @@ namespace Olympia.Systems
             if (downedMinotaur) { tag["downedMinotaur"] = true; }
             if (downedMedusa) { tag["downedMedusa"] = true; }
             if (downedZeus) { tag["downedZeus"] = true; }
+            if (downedCerberus) { tag["downedCerberus"] = true; }
+            if (downedHydra) { tag["downedHydra"] = true; }
             tag["TempleOfOlympusX"] = TempleOfOlympusArea.X;
             tag["TempleOfOlympusY"] = TempleOfOlympusArea.Y;
             tag["TempleOfOlympusW"] = TempleOfOlympusArea.Width;
@@ -49,6 +55,8 @@ namespace Olympia.Systems
             downedMinotaur = tag.ContainsKey("downedMinotaur");
             downedMedusa = tag.ContainsKey("downedMedusa");
             downedZeus = tag.ContainsKey("downedZeus");
+            downedCerberus = tag.ContainsKey("downedCerberus");
+            downedHydra = tag.ContainsKey("downedHydra");
             TempleOfOlympusArea = new Rectangle(tag.GetInt("TempleOfOlympusX"), tag.GetInt("TempleOfOlympusY"), tag.GetInt("TempleOfOlympusW"), tag.GetInt("TempleOfOlympusH"));
             LabyrinthOfTheMinotaurArea = new Rectangle(tag.GetInt("LabyrinthOfTheMinotaurX"), tag.GetInt("LabyrinthOfTheMinotaurY"), tag.GetInt("LabyrinthOfTheMinotaurW"), tag.GetInt("LabyrinthOfTheMinotaurH"));
         }
@@ -58,6 +66,8 @@ namespace Olympia.Systems
             writer.Write(downedMinotaur);
             writer.Write(downedMedusa);
             writer.Write(downedZeus);
+            writer.Write(downedCerberus);
+            writer.Write(downedHydra);
             writer.Write(TempleOfOlympusArea.X);
             writer.Write(TempleOfOlympusArea.Y);
             writer.Write(TempleOfOlympusArea.Width);
@@ -73,6 +83,8 @@ namespace Olympia.Systems
             downedMinotaur = reader.ReadBoolean();
             downedMedusa = reader.ReadBoolean();
             downedZeus = reader.ReadBoolean();
+            downedCerberus = reader.ReadBoolean();
+            downedHydra = reader.ReadBoolean();
             TempleOfOlympusArea = new Rectangle(reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32());
             LabyrinthOfTheMinotaurArea = new Rectangle(reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32());
         }

@@ -102,6 +102,50 @@ Summons Zeus.'''
 				DisplayName: '''Treasure Bag (Zeus)'''
 				Tooltip: '''{$CommonItemTooltip.RightClickToOpen}'''
 			}
+			CerberusFang: {
+				DisplayName: '''Cerberus Fang'''
+				Tooltip: '''Taken from the hound at the gate.'''
+			}
+			HydraScale: {
+				DisplayName: '''Hydra Scale'''
+				Tooltip: '''It grows back, twice.'''
+			}
+			HoneyCakeOfCerberus: {
+				DisplayName: '''Honey Cake of Cerberus'''
+				Tooltip: '''Sweet and drugged. The hound at the gate is hungry.
+Summons Cerberus.'''
+			}
+			LernaeanLure: {
+				DisplayName: '''Lernaean Lure'''
+				Tooltip: '''Stir the marsh and it answers.
+Summons the Hydra.'''
+			}
+			HellfangBlade: {
+				DisplayName: '''Hellfang Blade'''
+				Tooltip: '''A fang the length of a forearm, still warm.'''
+			}
+			ChainsOfHades: {
+				DisplayName: '''Chains of Hades'''
+				Tooltip: '''Immune to knockback
+Increases damage by 8%'''
+			}
+			LernaeanBow: {
+				DisplayName: '''Lernaean Bow'''
+				Tooltip: '''Every arrow is dipped in the Hydra's blood.
+Uses arrows.'''
+			}
+			HydraHeart: {
+				DisplayName: '''Hydra Heart'''
+				Tooltip: '''Greatly increases life regeneration'''
+			}
+			CerberusBag: {
+				DisplayName: '''Treasure Bag (Cerberus)'''
+				Tooltip: '''{$CommonItemTooltip.RightClickToOpen}'''
+			}
+			HydraBag: {
+				DisplayName: '''Treasure Bag (The Hydra)'''
+				Tooltip: '''{$CommonItemTooltip.RightClickToOpen}'''
+			}
 			OlympianMarble: {
 				DisplayName: '''Olympian Marble'''
 				Tooltip: '''White marble veined with grey.'''
@@ -159,6 +203,12 @@ Summons Zeus.'''
 			}
 			Zeus: {
 				DisplayName: '''Zeus, King of the Gods'''
+			}
+			Cerberus: {
+				DisplayName: '''Cerberus'''
+			}
+			Hydra: {
+				DisplayName: '''The Hydra'''
 			}
 		}
 		Projectiles: {

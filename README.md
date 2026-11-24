@@ -1,6 +1,6 @@
 # terraria-olmypia
 
-Ancient Greece for **Terraria** (tModLoader 1.4.4): the **Temple of Olympus** on the surface, the **Labyrinth of the Minotaur** underground, three bosses (the Minotaur, Medusa, Zeus),
+Ancient Greece for **Terraria** (tModLoader 1.4.4): the **Temple of Olympus** on the surface, the **Labyrinth of the Minotaur** underground, five bosses (the Minotaur, Medusa, Zeus, Cerberus, the Hydra),
 a Greek bestiary, relics, potions and marble. The Terraria sibling of [minecraft-olympia](https://github.com/SolutionsAsService/minecraft-olympia) and of
 [terraria-khemet](https://github.com/SolutionsAsService/terraria-khemet), built on the SHADW stack's `terraria-tmodloader` adapter ([shadw-modding](https://github.com/SolutionsAsService/shadw-modding)).
 
@@ -10,18 +10,18 @@ a Greek bestiary, relics, potions and marble. The Terraria sibling of [minecraft
 
 These are the blueprints the world generator places, drawn by the same code (not screenshots of the game).
 
-## What is in it (v0.1.0)
+## What is in it (v0.2.0)
 
 | | |
 |---|---|
 | **Temple of Olympus** (surface) | A 65-wide marble temple on three steps: a colonnade (the columns are background walls, so you walk through), a meander frieze, a pediment, a walled cella with an altar, braziers and two chests, and a hatch down to a crypt with three more. Placed after the vanilla Pyramids pass on the flattest, greenest ground it can find. |
 | **Labyrinth of the Minotaur** (underground) | A 15 by 7 cell maze of black marble (a perfect maze, so every cell is reachable) with platforms in the floor holes so it can be climbed, torches, spike pits, eight chests in dead ends, the Minotaur's lair (3 by 3 cells) at the centre, and a roped shaft from the surface. |
-| **Bosses** | **The Minotaur** (pre-Hardmode, ground boss: walks and jumps after you, charges, leaps and slams out debris, calls snakes), **Medusa** (Hardmode, hovers: dashes, spits venom volleys, calls snakes), **Zeus** (post-Plantera, hovers: dashes, fans of lightning, rains lightning in waves, calls birds). Each enrages below half life; each has a summon item, treasure bag, drops, a boss-bar icon and a "downed" flag. |
+| **Bosses** | **The Minotaur** (pre-Hardmode, ground boss: walks and jumps after you, charges, leaps and slams out debris, calls snakes), **Medusa** (Hardmode, hovers: dashes, spits venom volleys, calls snakes), **Zeus** (post-Plantera, hovers: dashes, fans of lightning, rains lightning in waves, calls birds), **Cerberus** (pre-Hardmode, ground boss: a three-headed hound that charges four times, slams out debris and calls hoplites) and **the Hydra** (Hardmode, hovers: three weaving necks, venom volleys and venom rain, calls snakes). Each enrages below half life; each has a summon item, treasure bag, drops, a boss-bar icon and a "downed" flag. |
 | **Enemies** | Hoplite, Satyr, Cyclops, Stymphalian Bird, Gorgon Snake, spawning on the surface, in forests, underground and (most thickly) inside the two structures. |
-| **Items** | Bronze Xiphos, Labrys, Bow of Artemis, Trident of Poseidon, Thunderbolt of Zeus; Aegis, Winged Sandals, Laurel Wreath, Gorgon's Eye, Cloak of Olympus; Ambrosia, Nectar of the Gods, Wine of Dionysus (each gives a buff); the three summons; Bronze Bar, Gorgon Scale, Lightning Fragment, Ambrosia Flower. |
+| **Items** | Bronze Xiphos, Labrys, Bow of Artemis, Trident of Poseidon, Thunderbolt of Zeus; Aegis, Winged Sandals, Laurel Wreath, Gorgon's Eye, Cloak of Olympus; Ambrosia, Nectar of the Gods, Wine of Dionysus (each gives a buff); the five summons (Horn of the Labyrinth, Mirror of Perseus, Offering to Zeus, Honey Cake of Cerberus, Lernaean Lure); Hellfang Blade, Chains of Hades, Lernaean Bow, Hydra Heart, Cerberus Fang, Hydra Scale; Bronze Bar, Gorgon Scale, Lightning Fragment, Ambrosia Flower. |
 | **Blocks** | Olympian Marble, Black Marble, Meander Brick, Bronze Plate, all craftable. |
 
-Previews: [items](preview/items.png), [tiles and projectiles](preview/tiles-and-projectiles.png), [enemies](preview/enemies.png), [bosses](preview/bosses.png), [buffs](preview/buffs.png).
+Previews: [grade sheet](preview/grade-sheet.png), [silhouettes](preview/silhouettes.png), [actual size](preview/actual-size.png), [items](preview/items.png), [tiles and projectiles](preview/tiles-and-projectiles.png), [enemies](preview/enemies.png), [bosses](preview/bosses.png), [buffs](preview/buffs.png).
 
 ## How it is made
 
@@ -42,6 +42,6 @@ python3 tools/shadwtmod/tmod.py . gen | lint | check | preview
 * **Not yet built against, or loaded in, a real tModLoader** (this machine has no route to it; steamcmd could not reach Steam). The C# compiles only against a stub of the API, which cannot prove the real API accepts it.
   `.github/workflows/build.yml` has an experimental real-build job. Expect a few API fixes on the first real build.
 * Nothing has been played: boss balance, attack patterns, spawn rates and the structures' feel are untested. The maze is a perfect maze and the temple is flood-filled from its entrance in `lint`, so every room is reachable on paper.
-* Sprites are generated pixel art, a first pass. No armour, trophies, music, custom walls or worm bosses yet. Wall names for the structures (`GrayBrick`, `SandstoneBrick`) are safe vanilla choices, not marble walls.
+* Sprites are generated pixel art, redrawn on 2026-11-24 with a lit-primitive toolkit (the owner graded the first pass C-; the redraw awaits a grade: see `preview/grade-sheet.png`, numbered G1.. , plus `preview/silhouettes.png` and `preview/actual-size.png`). No armour, trophies, music, custom walls or worm bosses yet. Wall names for the structures (`GrayBrick`, `SandstoneBrick`) are safe vanilla choices, not marble walls.
 
 See [DESIGN.md](DESIGN.md).

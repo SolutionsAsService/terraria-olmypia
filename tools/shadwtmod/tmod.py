@@ -225,7 +225,7 @@ def tile_canvas(t):
 
 ENEMY_FRAMES = {"cobra": (s2.enemy_cobra, 3), "guardian": (s2.enemy_guardian, 3), "scarab": (s2.enemy_scarab, 4), "hoplite": (s2.enemy_hoplite, 3), "satyr": (s2.enemy_satyr, 3),
                 "cyclops": (s2.enemy_cyclops, 3), "bird": (s2.enemy_bird, 4), "snake": (s2.enemy_snake, 3)}
-BOSS_FNS = {"forgotten": s2.boss_forgotten, "anubis": s2.boss_anubis, "sun": s2.boss_sun, "minotaur": s2.boss_minotaur, "medusa": s2.boss_medusa, "zeus": s2.boss_zeus}
+BOSS_FNS = {"forgotten": s2.boss_forgotten, "anubis": s2.boss_anubis, "sun": s2.boss_sun, "minotaur": s2.boss_minotaur, "medusa": s2.boss_medusa, "zeus": s2.boss_zeus, "cerberus": s2.boss_cerberus, "hydra": s2.boss_hydra}
 
 
 def npc_sheet(n):
